@@ -25,7 +25,15 @@ export default function RootLayout({
                 </header>
                 <main className="flex-1">{children}</main>
                 <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-                    &copy; {new Date().getFullYear()} career@las. Data cached locally.
+                    &copy; {new Date().getFullYear()}{" "}
+                    <a
+                        href="https://github.com/ronaldgosso"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-400 hover:text-teal-300 hover:underline transition-colors"
+                    >
+                        Ronald Gosso
+                    </a>
                 </footer>
             </body>
         </html>
