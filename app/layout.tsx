@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "./global.css";
 import { LocationSwitcher } from "@/components/location-switcher";
 
 export const metadata: Metadata = {
