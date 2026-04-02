@@ -18,7 +18,7 @@ export interface RecommendationRecord {
   id: string;
   location: GeoData;
   field: string;
-   RecommendationPayload;
+  data: RecommendationPayload;
   generatedAt: number;
 }
 
@@ -42,7 +42,7 @@ export async function getLocationFromDB(): Promise<LocationRecord | null> {
   return db.get("locationCache", "primary") || null;
 }
 
-export async function saveLocationToDB( Omit<LocationRecord, "id" | "updatedAt">): Promise<void> {
+export async function saveLocationToDB(data: Omit<LocationRecord, "id" | "updatedAt">): Promise<void> {
   const db = await getDB();
   await db.put("locationCache", { ...data, id: "primary", updatedAt: Date.now() });
 }

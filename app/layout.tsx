@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./global.css";
 import { LocationSwitcher } from "@/components/location-switcher";
 
@@ -13,27 +14,24 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en">
             <body className="min-h-dvh flex flex-col">
                 <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-[var(--bg-primary)]/80 backdrop-blur-md">
                     <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-                        <span className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
-                            career@las
-                        </span>
+                        <div className="flex items-center gap-6">
+                            <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors">
+                                career@las
+                            </Link>
+                            <Link href="/dashboard" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors">
+                                Dashboard
+                            </Link>
+                        </div>
                         <LocationSwitcher />
                     </div>
                 </header>
                 <main className="flex-1">{children}</main>
                 <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-                    &copy; {new Date().getFullYear()}{" "}
-                    <a
-                        href="https://github.com/ronaldgosso"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-teal-400 hover:text-teal-300 hover:underline transition-colors"
-                    >
-                        Ronald Gosso
-                    </a>
+                    &copy; {new Date().getFullYear()} career@las. Data cached locally.
                 </footer>
             </body>
         </html>
