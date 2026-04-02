@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="min-h-dvh flex flex-col">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-dvh flex flex-col" suppressHydrationWarning>
         <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-[var(--bg-primary)]/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
             <span className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">
@@ -28,7 +28,7 @@ export default function RootLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-          &copy; {new Date().getFullYear()} Ronald Gosso. Data cached locally.
+          © {new Date().getFullYear()} Ronald Gosso. Data cached locally.
         </footer>
       </body>
     </html>
