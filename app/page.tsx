@@ -1,9 +1,9 @@
 "use client";
 
-import { useAmbientLocation } from "@/hooks/use-ambient-locations";
+import { useLocation } from "@/hooks/use-location";
 
 export default function Home() {
-  const { status, data, message } = useAmbientLocation();
+  const { status, data, message } = useLocation();
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
@@ -22,10 +22,10 @@ export default function Home() {
           {status === "idle" && <span className="text-[var(--text-muted)]">Initializing resolver...</span>}
           {status === "resolving" && <span className="text-[var(--accent)]">Detecting ambient location...</span>}
           {status === "resolved" && (
-            <span className="text-green-400">Resolved: {data?.city || "Coordinates"}, {data?.country}</span>
+            <span className="text-green-400">Resolved: {data?.city}, {data?.country}</span>
           )}
           {status === "fallback" && (
-            <span className="text-yellow-400">Fallback mode active {data?.country !== "Earth" ? `→ ${data?.city}` : ""}</span>
+            <span className="text-yellow-400">Network fallback: {data?.city}, {data?.country}</span>
           )}
           {status === "error" && <span className="text-red-400">Location unavailable</span>}
         </div>
