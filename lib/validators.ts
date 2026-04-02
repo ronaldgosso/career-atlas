@@ -26,11 +26,11 @@ export const ProfessionalTitleSchema = z.object({
 });
 
 export const RecommendationSchema = z.object({
-    books: z.array(RecommendationItemSchema).min(8).max(12),
-    videos: z.array(RecommendationItemSchema).min(8).max(12),
-    projects: z.array(RecommendationItemSchema).min(8).max(12),
-    online_resources: z.array(RecommendationItemSchema).min(8).max(12),
-    professional_titles: z.array(ProfessionalTitleSchema).min(5).max(12),
+    books: z.array(RecommendationItemSchema).min(3).max(6),
+    videos: z.array(RecommendationItemSchema).min(3).max(6),
+    projects: z.array(RecommendationItemSchema).min(3).max(6),
+    online_resources: z.array(RecommendationItemSchema).min(3).max(6),
+    professional_titles: z.array(ProfessionalTitleSchema).min(3).max(6),
     metadata: z.object({
         region: z.string(),
         currency_symbol: z.string(),

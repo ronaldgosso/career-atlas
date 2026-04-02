@@ -1,18 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RecommendRequestSchema } from "@/lib/validators";
+import { RecommendRequestSchema, type RecommendationPayload } from "@/lib/validators";
 import { callHuggingFace } from "@/lib/ai-client";
 
-const SYSTEM_PROMPT = `You are an expert career architect. Output ONLY valid JSON. No markdown, no explanations.
-Follow this exact structure:
-{
-  "books": [{"title":"...", "detail":"Author & Edition", "url":"...", "reason":"Why it's essential for this region/field"}],
-  "videos": [{"title":"...", "detail":"Channel/Creator", "url":"...", "reason":"..."}],
-  "projects": [{"title":"...", "detail":"Scope & Deliverables", "url":"...", "reason":"..."}],
-  "online_resources": [{"title":"...", "detail":"Platform Type", "url":"...", "reason":"..."}],
-  "professional_titles": [{"title":"...", "level":"Entry/Mid/Senior/Lead", "salary_range":"...", "reason":"..."}],
-  "metadata": {"region":"...", "currency_symbol":"$|€|£|¥|₹|₺|₦|KSh|A$|R$|AED", "generated_at":"ISO8601"}
+const CATEGORY_PROMPTS: Record<string, string> = {
+    books: `Generate 3 book recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Book Title", "detail":"Author & Edition", "url":"https://example.com", "reason":"Why this book is valuable for this region/field"}]`,
+    videos: `Generate 3 video tutorial recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Video Title", "detail":"Channel/Creator", "url":"https://youtube.com/...", "reason":"Why this video series is helpful"}]`,
+    projects: `Generate 3 hands-on project ideas for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Project Name", "detail":"Scope & key deliverables", "url":"https://github.com/...", "reason":"Skills this project demonstrates"}]`,
+    online_resources: `Generate 3 online learning resources for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Course/Platform Name", "detail":"Platform type (Course/Certification/etc)", "url":"https://...", "reason":"Why this resource is valuable"}]`,
+    professional_titles: `Generate 3 professional job titles for {field} in {region}. Output ONLY JSON array: [{"title":"Job Title", "level":"Entry|Mid-Level|Senior|Lead", "salary_range":"Realistic range for region", "reason":"Career progression context"}]`,
+};
+
+const METADATA = {
+    currency_symbol: "$",
+    generated_at: new Date().toISOString(),
+};
+
+async function fetchCategory(
+    category: string,
+    region: string,
+    field: string,
+    signal?: AbortSignal
+): Promise<unknown[]> {
+    const prompt = CATEGORY_PROMPTS[category]
+        .replace("{region}", region)
+        .replace("{field}", field);
+
+    const stream = await callHuggingFace(prompt, signal);
+    if (!stream) throw new Error(`Failed to fetch ${category}`);
+
+    const reader = stream.getReader();
+    let result = "";
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += new TextDecoder().decode(value);
+    }
+
+    try {
+        const json = JSON.parse(result.trim());
+        return Array.isArray(json) ? json : [];
+    } catch {
+        return [];
+    }
 }
-Adapt resources to university syllabi norms for {region}. Provide 10 items per category. Use realistic, current salary ranges for {region}.`;
 
 export async function POST(req: NextRequest) {
     if (req.method !== "POST") {
@@ -27,20 +57,37 @@ export async function POST(req: NextRequest) {
     }
 
     const { location, field } = parsed.data;
-    const prompt = `${SYSTEM_PROMPT.replace("{region}", `${location.city}, ${location.country}`).replace("{field}", field)}`;
+    const region = `${location.city}, ${location.country}`;
 
     try {
-        const stream = await callHuggingFace(prompt);
-        if (!stream) {
-            return NextResponse.json({ error: "Stream initialization failed" }, { status: 502 });
-        }
+        const controller = new AbortController();
 
-        // Stream raw tokens directly to client. Parser handles validation downstream.
-        return new Response(stream, {
+        // Fetch all categories in parallel with individual calls
+        const [books, videos, projects, online_resources, professional_titles] = await Promise.all([
+            fetchCategory("books", region, field, controller.signal) as Promise<RecommendationPayload["books"]>,
+            fetchCategory("videos", region, field, controller.signal) as Promise<RecommendationPayload["videos"]>,
+            fetchCategory("projects", region, field, controller.signal) as Promise<RecommendationPayload["projects"]>,
+            fetchCategory("online_resources", region, field, controller.signal) as Promise<RecommendationPayload["online_resources"]>,
+            fetchCategory("professional_titles", region, field, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
+        ]);
+
+        const payload: RecommendationPayload = {
+            books,
+            videos,
+            projects,
+            online_resources,
+            professional_titles,
+            metadata: {
+                region,
+                currency_symbol: METADATA.currency_symbol,
+                generated_at: METADATA.generated_at,
+            },
+        };
+
+        // Stream the complete JSON response
+        return new Response(JSON.stringify(payload), {
             headers: {
-                "Content-Type": "text/event-stream",
-                "Cache-Control": "no-cache",
-                Connection: "keep-alive",
+                "Content-Type": "application/json",
             },
         });
     } catch (err: unknown) {

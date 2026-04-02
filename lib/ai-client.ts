@@ -19,8 +19,8 @@ export async function callHuggingFace(
             const stream = await hf.chatCompletionStream({
                 model: HF_MODEL,
                 messages: [{ role: "user", content: prompt }],
-                max_tokens: 2048,
-                temperature: 0.4,
+                max_tokens: 1024,
+                temperature: 0.7,
             }, { signal });
 
             // Convert async iterable to ReadableStream
@@ -35,11 +35,22 @@ export async function callHuggingFace(
                         }
                         controller.close();
                     } catch (err) {
-                        controller.error(err);
+                        if (err instanceof Error && err.message.includes("token")) {
+                            controller.error(new Error("Response exceeded token limit. Try a simpler request."));
+                        } else {
+                            controller.error(err);
+                        }
                     }
                 },
             });
         } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+
+            // Handle token limit errors specifically
+            if (errorMsg.includes("token") || errorMsg.includes("length")) {
+                throw new Error("Response exceeded token limit. Try a simpler request.");
+            }
+
             retries--;
             if (retries <= 0) throw err;
             await new Promise((r) => setTimeout(r, delay));
