@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from "idb";
-import type { GeoData } from "@/lib/validators";
+import type { GeoData, RecommendationPayload } from "@/lib/validators";
 
 export interface LocationRecord extends GeoData {
   id: string;
@@ -13,10 +13,12 @@ export interface PreferenceRecord {
   updatedAt: number;
 }
 
+// Matches the exact structure written in Phase 3 hooks/use-recommendations.ts
 export interface RecommendationRecord {
   id: string;
-  preferenceId: string;
-  data: Record<string, unknown>;
+  location: GeoData;
+  field: string;
+   RecommendationPayload;
   generatedAt: number;
 }
 
@@ -26,7 +28,6 @@ export async function getDB() {
   if (!dbPromise) {
     dbPromise = openDB("career-atlas-db", 1, {
       upgrade(db) {
-        // Primary key 'primary' ensures single active location record
         db.createObjectStore("locationCache", { keyPath: "id" });
         db.createObjectStore("preferences", { keyPath: "id" });
         db.createObjectStore("recommendations", { keyPath: "id" });
@@ -41,14 +42,9 @@ export async function getLocationFromDB(): Promise<LocationRecord | null> {
   return db.get("locationCache", "primary") || null;
 }
 
-export async function saveLocationToDB(data: Omit<LocationRecord, "id" | "updatedAt">): Promise<void> {
+export async function saveLocationToDB( Omit<LocationRecord, "id" | "updatedAt">): Promise<void> {
   const db = await getDB();
-  await db.put("locationCache", {
-    ...data,
-    id: "primary",
-    updatedAt: Date.now(),
-  });
+  await db.put("locationCache", { ...data, id: "primary", updatedAt: Date.now() });
 }
 
-// 7-day cache window balances accuracy with rate-limit respect and offline reliability
 export const LOCATION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
