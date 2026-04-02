@@ -1,13 +1,8 @@
 import { openDB, type IDBPDatabase } from "idb";
+import type { GeoData } from "@/lib/validators";
 
-export interface LocationRecord {
+export interface LocationRecord extends GeoData {
   id: string;
-  city: string;
-  region: string;
-  country: string;
-  countryCode: string;
-  lat: number;
-  lon: number;
   updatedAt: number;
 }
 
@@ -31,14 +26,29 @@ export async function getDB() {
   if (!dbPromise) {
     dbPromise = openDB("career-atlas-db", 1, {
       upgrade(db) {
-        // Prevents duplicate writes on location refresh
-        db.createObjectStore("preferences", { keyPath: "id" });
-        // Allows cache invalidation by timestamp
-        db.createObjectStore("recommendations", { keyPath: "id" });
-        // Stores raw geo data with expiry checks
+        // Primary key 'primary' ensures single active location record
         db.createObjectStore("locationCache", { keyPath: "id" });
+        db.createObjectStore("preferences", { keyPath: "id" });
+        db.createObjectStore("recommendations", { keyPath: "id" });
       },
     });
   }
   return dbPromise;
 }
+
+export async function getLocationFromDB(): Promise<LocationRecord | null> {
+  const db = await getDB();
+  return db.get("locationCache", "primary") || null;
+}
+
+export async function saveLocationToDB(data: Omit<LocationRecord, "id" | "updatedAt">): Promise<void> {
+  const db = await getDB();
+  await db.put("locationCache", {
+    ...data,
+    id: "primary",
+    updatedAt: Date.now(),
+  });
+}
+
+// 7-day cache window balances accuracy with rate-limit respect and offline reliability
+export const LOCATION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
