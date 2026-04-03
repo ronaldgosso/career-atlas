@@ -82,7 +82,7 @@ This project follows [Semantic Versioning](https://semver.org/) and keeps a huma
 
 ---
 
-## [0.1.0] — 2026-04-03
+## [0.1.0] — 2026-04-02
 
 **Initial Release** — Career Atlas ships as an offline-first, location-aware career resource recommender powered by Meta-Llama-3-8B.
 
