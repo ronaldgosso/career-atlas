@@ -43,6 +43,7 @@ export type RecommendationPayload = z.infer<typeof RecommendationSchema>;
 export const RecommendRequestSchema = z.object({
     location: GeoSchema,
     field: z.string().min(1, "Field is required"),
+    use_gemini: z.boolean().optional().default(false),
 });
 
 export type RecommendRequest = z.infer<typeof RecommendRequestSchema>;

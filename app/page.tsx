@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useLocation } from "@/hooks/use-location";
 import { useRecommendations } from "@/hooks/use-recommendations";
 import { FieldSelector } from "@/components/field-selector";
@@ -7,11 +8,12 @@ import { RecommendationsDashboard } from "@/components/recommendations-dashboard
 import { LoadingOrb } from "@/components/loading-orb";
 
 export default function Home() {
+  const [useGemini, setUseGemini] = useState(false);
   const { status, data } = useLocation();
   const { status: recStatus, payload, error, fetchRecommendations, cancel, reset, retryCount } = useRecommendations();
 
-  const handleFieldSelect = (field: string) => {
-    if (data) fetchRecommendations(data, field);
+  const handleFieldSelect = (field: string, useGeminiVideos: boolean) => {
+    if (data) fetchRecommendations(data, field, useGeminiVideos);
   };
 
   const isReady = status === "resolved" || status === "fallback";
@@ -60,6 +62,8 @@ export default function Home() {
             {/* Field Selector */}
             <FieldSelector
               onFieldSelect={handleFieldSelect}
+              useGemini={useGemini}
+              onGeminiToggle={() => setUseGemini((v) => !v)}
               disabled={isLoading}
             />
 
@@ -113,7 +117,7 @@ export default function Home() {
                         <p className="mt-1 text-sm text-amber-200/70">{error}</p>
                       </div>
                       <button
-                        onClick={() => handleFieldSelect("IT")}
+                        onClick={() => handleFieldSelect("IT", useGemini)}
                         className="rounded-lg bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-300 transition hover:bg-amber-500/30"
                       >
                         Retry with IT field (Attempt {retryCount})
@@ -133,6 +137,7 @@ export default function Home() {
                   region={data?.city || "your city"}
                   field={payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
                   generatedAt={Date.now()}
+                  usedGemini={useGemini}
                 />
               </div>
             )}

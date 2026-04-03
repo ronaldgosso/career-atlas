@@ -19,9 +19,10 @@ interface Props {
     region: string;
     field?: string;
     generatedAt?: number;
+    usedGemini?: boolean;
 }
 
-export function RecommendationsDashboard({ payload, onReset, region, field, generatedAt }: Props) {
+export function RecommendationsDashboard({ payload, onReset, region, field, generatedAt, usedGemini = false }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>("books");
 
     const handleExportPDF = () => {
@@ -106,6 +107,36 @@ export function RecommendationsDashboard({ payload, onReset, region, field, gene
                                 </div>
                             </div>
                         ))}
+                        {/* Gemini hint when videos are AI-generated */}
+                        {activeTab === "videos" && !usedGemini && (
+                            <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-950/20 px-4 py-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                                        <svg className="h-4 w-4 text-blue-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-blue-200/80">AI-generated video recommendations</p>
+                                        <p className="text-xs text-blue-200/50 mt-0.5">
+                                            These videos were suggested by AI and may not currently exist on YouTube. Enable Gemini for real-time YouTube search with verified, currently available videos.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {/* Gemini badge when used */}
+                        {activeTab === "videos" && usedGemini && (
+                            <div className="mt-4 flex items-center gap-2 text-xs text-teal-200/50">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-blue-300">
+                                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Gemini-powered
+                                </span>
+                                <span>Real YouTube search results</span>
+                            </div>
+                        )}
                     </div>
                 );
         }

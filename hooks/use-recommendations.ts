@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { AISStreamParser } from "@/lib/ai-stream-parser";
 import { GeoData, type RecommendationPayload } from "@/lib/validators";
 import { getDB } from "@/lib/db";
 
@@ -18,7 +17,7 @@ export function useRecommendations() {
     const [state, setState] = useState<RecState>({ status: "idle", payload: null, error: null, retryCount: 0 });
     const abortRef = useRef<AbortController | null>(null);
 
-    const fetchRecommendations = useCallback(async (location: GeoData, field: string) => {
+    const fetchRecommendations = useCallback(async (location: GeoData, field: string, useGemini = false) => {
         if (abortRef.current) abortRef.current.abort();
         const controller = new AbortController();
         abortRef.current = controller;
@@ -29,7 +28,7 @@ export function useRecommendations() {
             const res = await fetch("/api/recommend", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ location, field }),
+                body: JSON.stringify({ location, field, use_gemini: useGemini }),
                 signal: controller.signal,
             });
 
