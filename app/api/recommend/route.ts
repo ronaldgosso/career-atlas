@@ -13,6 +13,7 @@ interface ErrorResponse {
 
 const CATEGORY_PROMPTS: Record<string, string> = {
     books: `Generate 3 book recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Book Title", "detail":"Author & Edition", "url":"https://example.com", "reason":"Why this book is valuable for this region/field"}]`,
+    videos: `Generate 3 video tutorial recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Video Title", "detail":"Channel/Creator", "url":"https://youtube.com/...", "reason":"Why this video series is helpful"}]`,
     projects: `Generate 3 hands-on project ideas for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Project Name", "detail":"Scope & key deliverables", "url":"https://github.com/...", "reason":"Skills this project demonstrates"}]`,
     online_resources: `Generate 3 online learning resources for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Course/Platform Name", "detail":"Platform type (Course/Certification/etc)", "url":"https://...", "reason":"Why this resource is valuable"}]`,
     professional_titles: `Generate 3 professional job titles for {field} in {region}. Output ONLY JSON array: [{"title":"Job Title", "level":"Entry|Mid-Level|Senior|Lead", "salary_range":"Realistic range for region", "reason":"Career progression context"}]`,
@@ -29,7 +30,10 @@ async function fetchCategory(
     field: string,
     signal?: AbortSignal
 ): Promise<unknown[]> {
-    const prompt = CATEGORY_PROMPTS[category]
+    const promptTemplate = CATEGORY_PROMPTS[category];
+    if (!promptTemplate) throw new Error(`Unknown category: ${category}`);
+
+    const prompt = promptTemplate
         .replace("{region}", region)
         .replace("{field}", field);
 
@@ -53,40 +57,46 @@ async function fetchCategory(
 }
 
 function classifyHuggingFaceError(err: unknown): string {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("401") || msg.includes("403") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("token")) {
+    const rawMsg = err instanceof Error ? err.message : String(err);
+    const msg = rawMsg || "Unknown Hugging Face error";
+    const lower = msg.toLowerCase();
+
+    if (lower.includes("401") || lower.includes("403") || lower.includes("unauthorized") || lower.includes("token")) {
         return "Invalid or expired API token. Check your HUGGINGFACE_API_KEY.";
     }
-    if (msg.includes("429") || msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("too many")) {
+    if (lower.includes("429") || lower.includes("rate limit") || lower.includes("too many")) {
         return "Rate limit exceeded. Hugging Face is throttling requests. Wait a moment and retry.";
     }
-    if (msg.includes("503") || msg.includes("model loading") || msg.toLowerCase().includes("model is currently loading") || msg.toLowerCase().includes("overloaded")) {
+    if (lower.includes("503") || lower.includes("model loading") || lower.includes("model is currently loading") || lower.includes("overloaded")) {
         return "Model is loading or overloaded. The Llama 3 model is temporarily unavailable on Hugging Face. Retry in a minute.";
     }
-    if (msg.includes("404") || msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("model not found")) {
+    if (lower.includes("404") || lower.includes("not found") || lower.includes("model not found")) {
         return "Model not found. The configured Hugging Face model endpoint is incorrect.";
     }
-    if (msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED") || msg.includes("network")) {
+    if (msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED") || lower.includes("network")) {
         return "Network error. Cannot reach Hugging Face API. Check your internet connection.";
     }
-    return msg || "Hugging Face API returned an unexpected error.";
+    return msg;
 }
 
 function classifyGeminiError(err: unknown): string {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("400") && msg.toLowerCase().includes("api key")) {
+    const rawMsg = err instanceof Error ? err.message : String(err);
+    const msg = rawMsg || "Unknown Gemini error";
+    const lower = msg.toLowerCase();
+
+    if (lower.includes("400") && lower.includes("api key")) {
         return "Invalid Gemini API key. Check your GOOGLE_GEMINI_API_KEY.";
     }
-    if (msg.includes("429") || msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("rate limit")) {
+    if (lower.includes("429") || lower.includes("quota") || lower.includes("rate limit")) {
         return "Gemini rate limit or quota exceeded. Retry later or check your Google Cloud quotas.";
     }
-    if (msg.includes("503") || msg.toLowerCase().includes("service unavailable")) {
+    if (lower.includes("503") || lower.includes("service unavailable")) {
         return "Gemini service is temporarily unavailable. Falling back to AI-generated videos.";
     }
-    if (msg.includes("403") || msg.toLowerCase().includes("permission")) {
+    if (lower.includes("403") || lower.includes("permission")) {
         return "Gemini access denied. Verify your API key has the necessary permissions.";
     }
-    return msg || "Gemini video search failed.";
+    return msg;
 }
 
 export async function POST(req: NextRequest) {
