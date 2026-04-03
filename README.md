@@ -24,9 +24,6 @@
   <a href="https://vercel.com/">
     <img src="https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel" />
   </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/ronaldgosso/career-atlas?color=43A047&logo=gnu" alt="License GPL-2.0" />
-  </a>
   <a href="https://huggingface.co/">
     <img src="https://img.shields.io/badge/AI-Meta%20Llama%203%208B-FFD21E?logo=huggingface&logoColor=black" alt="Llama 3 8B" />
   </a>
