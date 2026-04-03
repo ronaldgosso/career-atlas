@@ -227,11 +227,11 @@ career-atlas/
 | ✅ | **Network Administration** | Routing, switching, wireless |
 | ✅ | **Digital Marketing Tech** | MarTech, analytics, automation |
 | ✅ | **Finance & Accounting** | Financial analysis, accounting, fintech |
+| ✅ | **Law & Legal Tech** | Legal research, compliance tech |
 | ✅ | **Healthcare & MedTech** | Health informatics, clinical tech |
 | ✅ | **Education & EdTech** | Curriculum design, learning platforms |
-| ✅ | **Law & Legal Tech** | Legal research, compliance tech |
-| ✅ | **Creative Arts & Media** | Graphic design, video production, writing |
-| ✅ | **Engineering & Manufacturing** | Mechanical, electrical, civil engineering |
+| 🔲 | **Creative Arts & Media** | Graphic design, video production, writing |
+| 🔲 | **Engineering & Manufacturing** | Mechanical, electrical, civil engineering |
 | 🔲 | **Hospitality & Tourism** | Hotel management, travel tech, event planning |
 | 🔲 | **Agriculture & AgriTech** | Farm management, food science, sustainability |
 | 🔲 | **Construction & Real Estate** | Architecture, property management, smart buildings |
