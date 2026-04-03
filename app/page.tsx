@@ -7,10 +7,45 @@ import { FieldSelector } from "@/components/field-selector";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { LoadingOrb } from "@/components/loading-orb";
 
+const ERROR_CONFIG: Record<string, { icon: string; color: string; bg: string; borderColor: string; title: string; actionLabel: string }> = {
+  huggingface: {
+    icon: "🤖",
+    color: "text-amber-400",
+    bg: "bg-amber-950/20",
+    borderColor: "border-amber-500/20",
+    title: "AI Model Error",
+    actionLabel: "Retry",
+  },
+  gemini: {
+    icon: "✨",
+    color: "text-blue-400",
+    bg: "bg-blue-950/20",
+    borderColor: "border-blue-500/20",
+    title: "Gemini Video Search Failed",
+    actionLabel: "Retry without Gemini",
+  },
+  validation: {
+    icon: "⚠️",
+    color: "text-orange-400",
+    bg: "bg-orange-950/20",
+    borderColor: "border-orange-500/20",
+    title: "Validation Error",
+    actionLabel: "Retry",
+  },
+  network: {
+    icon: "🌐",
+    color: "text-red-400",
+    bg: "bg-red-950/20",
+    borderColor: "border-red-500/20",
+    title: "Network Error",
+    actionLabel: "Retry",
+  },
+};
+
 export default function Home() {
   const [useGemini, setUseGemini] = useState(false);
   const { status, data } = useLocation();
-  const { status: recStatus, payload, error, fetchRecommendations, cancel, reset, retryCount } = useRecommendations();
+  const { status: recStatus, payload, error, errorSource, errorDetails, warnings, fetchRecommendations, cancel, reset } = useRecommendations();
 
   const handleFieldSelect = (field: string, useGeminiVideos: boolean) => {
     if (data) fetchRecommendations(data, field, useGeminiVideos);
@@ -102,27 +137,61 @@ export default function Home() {
             )}
 
             {/* Error State */}
-            {recStatus === "error" && (
-              <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 p-6 backdrop-blur-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-                      <svg className="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      <div>
-                        <h3 className="font-medium text-amber-400">Generation failed</h3>
-                        <p className="mt-1 text-sm text-amber-200/70">{error}</p>
+            {recStatus === "error" && (() => {
+              const cfg = ERROR_CONFIG[errorSource] || ERROR_CONFIG.network;
+              const retryGeminiOff = errorSource === "gemini";
+              return (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className={`rounded-xl border ${cfg.borderColor} ${cfg.bg} p-6 backdrop-blur-sm`}>
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-2xl">
+                        {cfg.icon}
                       </div>
-                      <button
-                        onClick={() => handleFieldSelect("IT", useGemini)}
-                        className="rounded-lg bg-amber-500/20 px-4 py-2 text-sm font-medium text-amber-300 transition hover:bg-amber-500/30"
-                      >
-                        Retry with IT field (Attempt {retryCount})
-                      </button>
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <h3 className={`font-semibold ${cfg.color}`}>{cfg.title}</h3>
+                          <p className="mt-1.5 text-sm text-neutral-300/80 leading-relaxed">{error}</p>
+                          {errorDetails && (
+                            <p className="mt-1 text-xs text-neutral-400/60 font-mono bg-black/20 rounded-lg px-3 py-2">{errorDetails}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleFieldSelect("IT", retryGeminiOff ? false : useGemini)}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${cfg.bg.replace("/20", "/30")} ${cfg.color.replace("text-", "text-")} border ${cfg.borderColor} hover:brightness-125`}
+                          >
+                            {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Llama fallback)</span>}
+                          </button>
+                          {errorSource === "huggingface" && (
+                            <a
+                              href="https://huggingface.co/settings/tokens"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-neutral-400 hover:text-neutral-300 underline underline-offset-2"
+                            >
+                              Check API key
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Partial Success Warnings */}
+            {recStatus === "success" && payload && warnings.length > 0 && (
+              <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">⚠️</span>
+                  <div>
+                    <p className="text-sm font-medium text-amber-300">Some services had issues</p>
+                    <ul className="mt-1 text-xs text-amber-200/60 space-y-1">
+                      {warnings.map((w, i) => (
+                        <li key={i}>• {w}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </div>

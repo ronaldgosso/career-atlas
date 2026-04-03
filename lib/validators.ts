@@ -35,6 +35,7 @@ export const RecommendationSchema = z.object({
         region: z.string(),
         currency_symbol: z.string(),
         generated_at: z.string(),
+        warnings: z.array(z.string()).optional(),
     }),
 });
 

@@ -3,6 +3,14 @@ import { RecommendRequestSchema, type RecommendationPayload } from "@/lib/valida
 import { callHuggingFace } from "@/lib/ai-client";
 import { isGeminiAvailable, searchYouTubeVideos } from "@/lib/gemini-youtube";
 
+export type ErrorSource = "huggingface" | "gemini" | "network" | "validation" | "unknown";
+
+interface ErrorResponse {
+    error: string;
+    source: ErrorSource;
+    details?: string;
+}
+
 const CATEGORY_PROMPTS: Record<string, string> = {
     books: `Generate 3 book recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Book Title", "detail":"Author & Edition", "url":"https://example.com", "reason":"Why this book is valuable for this region/field"}]`,
     projects: `Generate 3 hands-on project ideas for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Project Name", "detail":"Scope & key deliverables", "url":"https://github.com/...", "reason":"Skills this project demonstrates"}]`,
@@ -26,7 +34,7 @@ async function fetchCategory(
         .replace("{field}", field);
 
     const stream = await callHuggingFace(prompt, signal);
-    if (!stream) throw new Error(`Failed to fetch ${category}`);
+    if (!stream) throw new Error(`Failed to fetch ${category}: AI stream unavailable`);
 
     const reader = stream.getReader();
     let result = "";
@@ -44,20 +52,63 @@ async function fetchCategory(
     }
 }
 
+function classifyHuggingFaceError(err: unknown): string {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("401") || msg.includes("403") || msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("token")) {
+        return "Invalid or expired API token. Check your HUGGINGFACE_API_KEY.";
+    }
+    if (msg.includes("429") || msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("too many")) {
+        return "Rate limit exceeded. Hugging Face is throttling requests. Wait a moment and retry.";
+    }
+    if (msg.includes("503") || msg.includes("model loading") || msg.toLowerCase().includes("model is currently loading") || msg.toLowerCase().includes("overloaded")) {
+        return "Model is loading or overloaded. The Llama 3 model is temporarily unavailable on Hugging Face. Retry in a minute.";
+    }
+    if (msg.includes("404") || msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("model not found")) {
+        return "Model not found. The configured Hugging Face model endpoint is incorrect.";
+    }
+    if (msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED") || msg.includes("network")) {
+        return "Network error. Cannot reach Hugging Face API. Check your internet connection.";
+    }
+    return msg || "Hugging Face API returned an unexpected error.";
+}
+
+function classifyGeminiError(err: unknown): string {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("400") && msg.toLowerCase().includes("api key")) {
+        return "Invalid Gemini API key. Check your GOOGLE_GEMINI_API_KEY.";
+    }
+    if (msg.includes("429") || msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("rate limit")) {
+        return "Gemini rate limit or quota exceeded. Retry later or check your Google Cloud quotas.";
+    }
+    if (msg.includes("503") || msg.toLowerCase().includes("service unavailable")) {
+        return "Gemini service is temporarily unavailable. Falling back to AI-generated videos.";
+    }
+    if (msg.includes("403") || msg.toLowerCase().includes("permission")) {
+        return "Gemini access denied. Verify your API key has the necessary permissions.";
+    }
+    return msg || "Gemini video search failed.";
+}
+
 export async function POST(req: NextRequest) {
     if (req.method !== "POST") {
-        return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+        const body: ErrorResponse = { error: "Method not allowed", source: "validation" };
+        return NextResponse.json(body, { status: 405 });
     }
 
     const body = await req.json().catch(() => null);
     const parsed = RecommendRequestSchema.safeParse(body);
 
     if (!parsed.success) {
-        return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+        const details = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+        const body: ErrorResponse = { error: "Invalid request payload", source: "validation", details };
+        return NextResponse.json(body, { status: 400 });
     }
 
     const { location, field, use_gemini } = parsed.data;
     const region = `${location.city}, ${location.country}`;
+
+    // Track which services have failed
+    const serviceErrors: { source: ErrorSource; message: string }[] = [];
 
     try {
         const controller = new AbortController();
@@ -68,8 +119,12 @@ export async function POST(req: NextRequest) {
                 try {
                     const geminiVideos = await searchYouTubeVideos(field, region, controller.signal);
                     if (geminiVideos.length > 0) return geminiVideos;
+                    // Gemini returned empty — not an error, just no results
+                    console.warn("[Gemini returned 0 videos, falling back to Llama]");
                 } catch (err) {
-                    console.warn("[Gemini Video Search Failed]", err instanceof Error ? err.message : "Unknown error");
+                    const geminiMsg = classifyGeminiError(err);
+                    console.warn("[Gemini Video Search Failed]", geminiMsg);
+                    serviceErrors.push({ source: "gemini", message: geminiMsg });
                     // Fall through to Llama fallback
                 }
             }
@@ -77,8 +132,8 @@ export async function POST(req: NextRequest) {
             return fetchCategory("videos", region, field, controller.signal);
         };
 
-        // Fetch all categories in parallel
-        const [books, videos, projects, online_resources, professional_titles] = await Promise.all([
+        // Fetch all categories in parallel — track which ones fail
+        const categoryResults = await Promise.allSettled([
             fetchCategory("books", region, field, controller.signal) as Promise<RecommendationPayload["books"]>,
             fetchVideos() as Promise<RecommendationPayload["videos"]>,
             fetchCategory("projects", region, field, controller.signal) as Promise<RecommendationPayload["projects"]>,
@@ -86,12 +141,44 @@ export async function POST(req: NextRequest) {
             fetchCategory("professional_titles", region, field, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
         ]);
 
+        // Separate successes and failures
+        const successes = categoryResults.filter((r) => r.status === "fulfilled");
+        const failures = categoryResults.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+
+        // Record Hugging Face errors
+        for (const f of failures) {
+            const msg = classifyHuggingFaceError(f.reason);
+            serviceErrors.push({ source: "huggingface", message: msg });
+        }
+
+        // If ALL categories failed, return an error response
+        if (successes.length === 0) {
+            const primaryError = serviceErrors[0] || { source: "unknown" as ErrorSource, message: "All AI services failed" };
+            const allMessages = [...new Set(serviceErrors.map((e) => e.message))].join("\n");
+            const body: ErrorResponse = {
+                error: primaryError.message,
+                source: primaryError.source,
+                details: serviceErrors.length > 1 ? allMessages : undefined,
+            };
+            return NextResponse.json(body, { status: 503 });
+        }
+
+        // If some succeeded and some failed, still return partial results
+        const [booksResult, videosResult, projectsResult, onlineResourcesResult, professionalTitlesResult] =
+            categoryResults.map((r) => (r.status === "fulfilled" ? r.value : [])) as [
+                RecommendationPayload["books"],
+                RecommendationPayload["videos"],
+                RecommendationPayload["projects"],
+                RecommendationPayload["online_resources"],
+                RecommendationPayload["professional_titles"],
+            ];
+
         const payload: RecommendationPayload = {
-            books,
-            videos,
-            projects,
-            online_resources,
-            professional_titles,
+            books: booksResult,
+            videos: videosResult,
+            projects: projectsResult,
+            online_resources: onlineResourcesResult,
+            professional_titles: professionalTitlesResult,
             metadata: {
                 region,
                 currency_symbol: METADATA.currency_symbol,
@@ -99,13 +186,22 @@ export async function POST(req: NextRequest) {
             },
         };
 
+        // Include warnings if some services failed but we still have partial data
+        if (serviceErrors.length > 0) {
+            payload.metadata.warnings = serviceErrors.map((e) => e.message);
+        }
+
         return new Response(JSON.stringify(payload), {
             headers: {
                 "Content-Type": "application/json",
             },
         });
     } catch (err: unknown) {
-        console.error("[AI Route Error]", err instanceof Error ? err.message : "Unknown error");
-        return NextResponse.json({ error: err instanceof Error ? err.message : "AI service unavailable" }, { status: 503 });
+        // Top-level unhandled error
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        const source: ErrorSource = msg.toLowerCase().includes("gemini") ? "gemini" : msg.toLowerCase().includes("hugging") ? "huggingface" : "unknown";
+        console.error("[AI Route Error]", msg);
+        const body: ErrorResponse = { error: msg, source, details: "Unexpected server error" };
+        return NextResponse.json(body, { status: 500 });
     }
 }
