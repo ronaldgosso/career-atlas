@@ -14,7 +14,7 @@ const TABS: { key: Tab; label: string; icon: string }[] = [
 
 interface Props {
     payload: RecommendationPayload;
-    onReset: () => void;
+    onReset?: () => void;
     region: string;
 }
 
@@ -120,12 +120,14 @@ export function RecommendationsDashboard({ payload, onReset, region }: Props) {
                             <p className="text-xs text-teal-200/50">Generated {new Date(metadata.generated_at).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={onReset}
-                        className="rounded-lg border border-teal-500/20 bg-teal-950/30 px-4 py-2 text-xs font-medium text-teal-200/70 transition-colors hover:border-teal-500/30 hover:bg-teal-900/40 hover:text-teal-100"
-                    >
-                        Start Over
-                    </button>
+                    {onReset && (
+                        <button
+                            onClick={onReset}
+                            className="rounded-lg border border-teal-500/20 bg-teal-950/30 px-4 py-2 text-xs font-medium text-teal-200/70 transition-colors hover:border-teal-500/30 hover:bg-teal-900/40 hover:text-teal-100"
+                        >
+                            Start Over
+                        </button>
+                    )}
                 </div>
             </div>
 
