@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getLocationFromDB, saveLocationToDB, LOCATION_TTL_MS } from "@/lib/db";
-import { resolveLocation, resolveIPFallback } from "@/lib/location";
 import type { GeoData } from "@/lib/validators";
 
 export type LocationStatus = "idle" | "resolving" | "resolved" | "fallback" | "error";
@@ -11,6 +10,24 @@ interface LocationState {
   status: LocationStatus;
   data: GeoData | null;
   message: string;
+}
+
+const FALLBACK_GEO: GeoData = {
+  city: "Global",
+  region: "Worldwide",
+  country: "Earth",
+  countryCode: "000",
+  lat: 0,
+  lon: 0,
+};
+
+async function fetchFromAPI(lat?: number, lon?: number): Promise<GeoData> {
+  const params = new URLSearchParams();
+  if (lat !== undefined) params.set("lat", String(lat));
+  if (lon !== undefined) params.set("lon", String(lon));
+  const res = await fetch(`/api/location?${params.toString()}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
 export function useLocation() {
@@ -50,7 +67,7 @@ export function useLocation() {
         async (pos) => {
           clearTimeout(timeout);
           try {
-            const geo = await resolveLocation(pos.coords.latitude, pos.coords.longitude);
+            const geo = await fetchFromAPI(pos.coords.latitude, pos.coords.longitude);
             if (mountedRef.current) await syncAndSet(geo, "gps");
           } catch {
             if (mountedRef.current) await handleFallback();
@@ -62,12 +79,8 @@ export function useLocation() {
     };
 
     const handleFallback = async () => {
-      try {
-        const geo = await resolveIPFallback();
-        if (mountedRef.current) await syncAndSet(geo, "ip");
-      } catch {
-        setState({ status: "error", data: null, message: "Location resolution failed" });
-      }
+      const geo = await fetchFromAPI();
+      if (mountedRef.current) await syncAndSet(geo, "ip");
     };
 
     init();
