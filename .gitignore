@@ -13,7 +13,8 @@ dist/
 # ─── Environment variables ───────────────────────────────────────────────────
 .env
 .env.*
-.qwen/
+.qwen*
+.env.local
 !.env.example
 
 # ─── TypeScript ──────────────────────────────────────────────────────────────
