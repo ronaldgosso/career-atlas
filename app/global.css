@@ -34,172 +34,246 @@
   }
 }
 
-@layer print {
-  @media print {
+/* ───────── Print Styles ───────── */
+@media print {
 
-    /* Hide everything by default */
-    body>* {
-      display: none !important;
-    }
+  /* Reset body */
+  body {
+    background: white !important;
+    color: #111 !important;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-    /* Show only printable content */
-    .printable {
-      display: block !important;
-    }
+  /* Hide navigation chrome */
+  header.sticky,
+  footer,
+  .offline-indicator,
+  .no-print {
+    display: none !important;
+  }
 
-    /* Print-specific body styles */
-    body {
-      background: white !important;
-      color: #111 !important;
-      font-family: "Segoe UI", system-ui, -apple-system, sans-serif !important;
-      padding: 0 !important;
-    }
+  /* Hide all buttons */
+  button,
+  a[href^="javascript"] {
+    display: none !important;
+  }
 
-    /* Typography for print */
-    h1,
-    h2,
-    h3,
-    h4 {
-      color: #111 !important;
-      page-break-after: avoid !important;
-    }
+  /* Hide fixed/background elements */
+  .fixed.inset-0,
+  .bg-gradient-to-br,
+  .bg-gradient-to-r,
+  .bg-slate-950,
+  .bg-teal-950,
+  .bg-teal-950\/20,
+  .bg-teal-950\/30,
+  .bg-teal-950\/40,
+  .bg-neutral-900,
+  .bg-amber-950,
+  .bg-cyan-950,
+  .bg-rose-950 {
+    background: white !important;
+    background-image: none !important;
+  }
 
-    h1 {
-      font-size: 24px !important;
-      border-bottom: 2px solid #333 !important;
-      padding-bottom: 8px !important;
-      margin-bottom: 16px !important;
-    }
+  /* Remove backdrop effects */
+  .backdrop-blur-sm,
+  .backdrop-blur-md {
+    backdrop-filter: none !important;
+  }
 
-    h2 {
-      font-size: 18px !important;
-      color: #333 !important;
-    }
+  /* ── Text colors ── */
+  .text-white,
+  .text-teal-50,
+  .text-teal-100,
+  .text-teal-200,
+  .text-teal-200\/50,
+  .text-teal-200\/60,
+  .text-teal-200\/70,
+  .text-teal-300,
+  .text-teal-100\/60,
+  .text-cyan-300,
+  .text-emerald-400,
+  .text-amber-400,
+  .text-amber-300,
+  .text-amber-200\/70,
+  .text-rose-300 {
+    color: #111 !important;
+  }
 
-    h3 {
-      font-size: 14px !important;
-      color: #555 !important;
-    }
+  .text-teal-200\/50,
+  .text-teal-200\/60,
+  .text-teal-200\/70,
+  .text-teal-100\/60 {
+    color: #555 !important;
+  }
 
-    /* Print card styles */
-    .print-card {
-      border: 1px solid #ddd !important;
-      border-radius: 4px !important;
-      padding: 10px 14px !important;
-      margin-bottom: 8px !important;
-      background: #fff !important;
-      page-break-inside: avoid !important;
-    }
+  .text-\[var\(--text-muted\)\] {
+    color: #666 !important;
+  }
 
-    .print-card-title {
-      font-weight: 600 !important;
-      font-size: 13px !important;
-      color: #111 !important;
-      margin-bottom: 2px !important;
-    }
+  .text-\[var\(--text-primary\)\] {
+    color: #111 !important;
+  }
 
-    .print-card-detail {
-      font-size: 11px !important;
-      color: #555 !important;
-      margin-bottom: 4px !important;
-    }
+  /* Transparent / gradient text → solid */
+  .text-transparent,
+  .bg-clip-text {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+  }
 
-    .print-card-reason {
-      font-size: 11px !important;
-      color: #666 !important;
-      font-style: italic !important;
-    }
+  /* ── Borders ── */
+  .border-teal-500,
+  .border-teal-500\/10,
+  .border-teal-500\/20,
+  .border-teal-500\/30,
+  .border-amber-500,
+  .border-amber-500\/20,
+  .border-neutral-800 {
+    border-color: #ccc !important;
+  }
 
-    /* Badge styles */
-    .print-badge {
-      display: inline-block !important;
-      font-size: 9px !important;
-      font-weight: 600 !important;
-      padding: 1px 6px !important;
-      border-radius: 999px !important;
-      border: 1px solid #ccc !important;
-      text-transform: uppercase !important;
-    }
+  /* ── Badge backgrounds ── */
+  .bg-teal-500\/10 {
+    background: #ecfdf5 !important;
+  }
 
-    .print-badge-entry {
-      color: #047857 !important;
-      border-color: #047857 !important;
-    }
+  .bg-cyan-500\/10 {
+    background: #ecfeff !important;
+  }
 
-    .print-badge-mid {
-      color: #0369a1 !important;
-      border-color: #0369a1 !important;
-    }
+  .bg-amber-500\/10 {
+    background: #fffbeb !important;
+  }
 
-    .print-badge-senior {
-      color: #b45309 !important;
-      border-color: #b45309 !important;
-    }
+  .bg-rose-500\/10 {
+    background: #fff1f2 !important;
+  }
 
-    .print-badge-lead {
-      color: #be123c !important;
-      border-color: #be123c !important;
-    }
+  .bg-teal-950\/50,
+  .bg-teal-950\/30,
+  .bg-teal-950\/20,
+  .bg-teal-950\/40 {
+    background: #f8fafc !important;
+  }
 
-    /* Salary */
-    .print-salary {
-      font-size: 16px !important;
-      font-weight: 700 !important;
-      color: #111 !important;
-      margin: 4px 0 !important;
-    }
+  /* ── Shadows ─ */
+  .shadow-lg,
+  .shadow-2xl,
+  .shadow-teal-500\/10,
+  .shadow-teal-500\/20,
+  .shadow-teal-500\/25,
+  .shadow-amber-500\/10,
+  .shadow-cyan-500\/5 {
+    box-shadow: none !important;
+  }
 
-    /* Header */
-    .print-header {
-      text-align: center !important;
-      margin-bottom: 24px !important;
-      padding-bottom: 12px !important;
-    }
+  /* ── Hover transforms ── */
+  .hover\:scale-\[1\.02\],
+  .hover\:scale-\[1\.01\],
+  .group:hover .group-hover\:scale-\[1\.02\],
+  .group:hover .group-hover\:scale-\[1\.01\] {
+    transform: none !important;
+  }
 
-    .print-header h1 {
-      border: none !important;
-      font-size: 28px !important;
-    }
+  /* Hover opacity overlays */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 0 !important;
+  }
 
-    .print-meta {
-      font-size: 12px !important;
-      color: #777 !important;
-    }
+  /* ── Absolute decorations (gradient overlays) ── */
+  .absolute.inset-0 {
+    display: none !important;
+  }
 
-    /* Table-like sections */
-    .print-section {
-      margin-bottom: 20px !important;
-      page-break-inside: avoid !important;
-    }
+  /* ── Animations ── */
+  .animate-in,
+  .fade-in,
+  .slide-in-from-bottom-8,
+  .slide-in-from-bottom-4,
+  .slide-in-from-top-4 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 
-    .print-section-title {
-      font-size: 14px !important;
-      font-weight: 700 !important;
-      color: #222 !important;
-      border-bottom: 1px solid #ddd !important;
-      padding-bottom: 4px !important;
-      margin-bottom: 8px !important;
-    }
+  /* ── Tab bar ── */
+  .overflow-x-auto {
+    overflow: visible !important;
+    border-bottom-color: #ddd !important;
+    background: #f9fafb !important;
+  }
 
-    /* Footer */
-    .print-footer {
-      font-size: 10px !important;
-      color: #999 !important;
-      text-align: center !important;
-      margin-top: 24px !important;
-      padding-top: 12px !important;
-      border-top: 1px solid #eee !important;
-    }
+  /* Active tab */
+  .bg-gradient-to-r.from-teal-500.to-cyan-500 {
+    background: #1e293b !important;
+    color: white !important;
+  }
 
-    /* Hide dark theme elements */
-    .no-print {
-      display: none !important;
-    }
+  /* Inactive tabs */
+  .text-teal-200\/60 {
+    color: #666 !important;
+  }
 
-    /* Make sure links show URLs */
-    a {
-      color: #2563eb !important;
-      text-decoration: none !important;
-    }
+  /* ── Index badges ── */
+  .from-teal-500\/20.to-cyan-500\/20 {
+    background: #f0fdfa !important;
+    color: #0d9488 !important;
+  }
+
+  /* ── Border-radius ── */
+  .rounded-2xl,
+  .rounded-xl,
+  .rounded-lg {
+    border-radius: 6px !important;
+  }
+
+  /* ── Page header ── */
+  section>header {
+    background: white !important;
+    border: none !important;
+    border-bottom: 2px solid #333 !important;
+    padding: 12px 0 !important;
+    margin-bottom: 16px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* ── Dashboard header row ── */
+  .border-b.border-teal-500\/10 {
+    border-bottom-color: #ddd !important;
+    background: white !important;
+    background-image: none !important;
+  }
+
+  /* ── Footer stats bar ── */
+  .border-t.border-teal-500\/10 {
+    border-top-color: #ddd !important;
+    background: #f9fafb !important;
+  }
+
+  /* ── Links ── */
+  a {
+    color: #2563eb !important;
+    text-decoration: none !important;
+  }
+
+  /* ── Page breaks ── */
+  .rounded-xl,
+  .rounded-2xl {
+    page-break-inside: avoid !important;
+  }
+
+  /* ── Spacing ── */
+  section {
+    max-width: 100% !important;
+    padding: 0 16px !important;
+  }
+
+  /* ── Loading/error states ── */
+  .animate-spin {
+    display: none !important;
   }
 }
