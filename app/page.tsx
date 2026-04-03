@@ -30,8 +30,16 @@ export default function Home() {
         <header className="rounded-2xl border border-teal-500/10 bg-teal-950/20 px-6 py-4 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 shadow-lg shadow-teal-500/25">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M12 2l2.5 6.5H9.5L12 2z" fill="currentColor" />
+                <path d="M12 22l2.5-6.5H9.5L12 22z" fill="currentColor" />
+                <path d="M22 12l-6.5 2.5V9.5L22 12z" fill="currentColor" />
+                <path d="M2 12l6.5 2.5V9.5L2 12z" fill="currentColor" />
+                <path d="M19.07 4.93l-4.24 4.24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M4.93 19.07l4.24-4.24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M19.07 19.07l-4.24-4.24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M4.93 4.93l4.24 4.24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </div>
             <div>

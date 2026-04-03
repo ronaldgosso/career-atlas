@@ -8,12 +8,12 @@ export const metadata: Metadata = {
     description: "Ambient location-aware career resource recommender",
     icons: {
         icon: [
-          { url: "favicon.ico", sizes: "48x48" },
+            { url: "favicon.ico", sizes: "48x48" },
         ],
         apple: [
-          { url: "apple-icon.png", sizes: "180x180" },
+            { url: "apple-icon.png", sizes: "180x180" },
         ],
-      },
+    },
 };
 
 export default function RootLayout({
@@ -39,7 +39,11 @@ export default function RootLayout({
                 </header>
                 <main className="flex-1">{children}</main>
                 <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-                    &copy; {new Date().getFullYear()} career@las. Data cached locally.
+                    &copy; {new Date().getFullYear()}{' '}
+                    <Link href="https://github.com/ronaldgosso" className="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+                        Ronald Gosso
+                    </Link>
+                    . Data cached locally.
                 </footer>
             </body>
         </html>
