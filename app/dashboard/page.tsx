@@ -7,6 +7,7 @@ import { type RecommendationRecord } from "@/lib/db";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { CacheControls } from "@/components/cache-controls";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { exportRecommendationToPDF } from "@/lib/pdf-export";
 
 export default function DashboardPage() {
   const [records, setRecords] = useState<RecommendationRecord[]>([]);
@@ -28,11 +29,8 @@ export default function DashboardPage() {
     await loadCache();
   };
 
-  const handleExportPDF = useCallback(() => {
-    window.print();
-  }, []);
-
   const activePayload = records.find(r => r.id === expandedId)?.data || null;
+  const activeRecord = records.find(r => r.id === expandedId) || null;
 
   return (
     <section className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
@@ -41,7 +39,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight">Offline Dashboard</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">Review locally cached recommendations. Zero network required.</p>
         </div>
-        <CacheControls records={records} onExportPDF={handleExportPDF} />
+        <CacheControls records={records} />
       </div>
 
       <OfflineIndicator />
@@ -70,22 +68,37 @@ export default function DashboardPage() {
                     {record.location?.city || "Unknown Region"} &bull; {new Date(record.generatedAt).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
                   <button
                     onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
                     className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
                   >
                     {expandedId === record.id ? "Collapse" : "View Details"}
                   </button>
+                  {expandedId === record.id && record.data && (
+                    <button
+                      onClick={() => {
+                        exportRecommendationToPDF(record.data!, record.location.city, record.field, record.generatedAt);
+                      }}
+                      className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
+                    >
+                      Export PDF
+                    </button>
+                  )}
                   <button onClick={() => handleDelete(record.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">
                     Delete
                   </button>
                 </div>
               </div>
 
-              {expandedId === record.id && activePayload && (
+              {expandedId === record.id && activePayload && activeRecord && (
                 <div className="border-t border-neutral-800 bg-[var(--bg-primary)]/40 p-4">
-                  <RecommendationsDashboard payload={activePayload} region={record.location.city} />
+                  <RecommendationsDashboard
+                    payload={activePayload}
+                    region={activeRecord.location.city}
+                    field={activeRecord.field}
+                    generatedAt={activeRecord.generatedAt}
+                  />
                 </div>
               )}
             </article>
