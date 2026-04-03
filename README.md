@@ -75,7 +75,7 @@ It works **offline-first** — every recommendation is cached locally via Indexe
   </tr>
   <tr>
     <td><b>📥 Export &amp; Clear Cache</b></td>
-    <td>Export all cached recommendations as JSON, or clear them with a single click.</td>
+    <td>Export all cached recommendations as JSON or print-ready PDF. Clear cache with confirmation.</td>
   </tr>
   <tr>
     <td><b>🔄 Cancel &amp; Retry</b></td>
@@ -253,7 +253,7 @@ career-atlas/
 
 - [ ] **Multi-language support** (Swahili, Spanish, French, Arabic)
 - [ ] **User profiles** — save preferences, track skill progression
-- [ ] **PDF export** of recommendation reports
+- [x] **PDF export** of recommendation reports
 - [ ] **Share recommendations** via shareable links
 - [ ] **AI-powered chat** — ask follow-up questions about any recommendation
 - [ ] **Community rankings** — upvote/downvote AI suggestions

@@ -4,7 +4,12 @@ import { useState } from "react";
 import { clearAllRecommendations, exportToJSON } from "@/lib/cache-manager";
 import type { RecommendationRecord } from "@/lib/db";
 
-export function CacheControls({ records }: { records: RecommendationRecord[] }) {
+interface Props {
+  records: RecommendationRecord[];
+  onExportPDF?: () => void;
+}
+
+export function CacheControls({ records, onExportPDF }: Props) {
   const [confirmClear, setConfirmClear] = useState(false);
 
   const handleExport = () => {
@@ -27,13 +32,21 @@ export function CacheControls({ records }: { records: RecommendationRecord[] }) 
   if (records.length === 0) return null;
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 items-center flex-wrap">
       <button
         onClick={handleExport}
         className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
       >
         Export JSON
       </button>
+      {onExportPDF && (
+        <button
+          onClick={onExportPDF}
+          className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
+        >
+          Export PDF
+        </button>
+      )}
       {confirmClear ? (
         <div className="flex gap-2 items-center text-xs">
           <button onClick={handleClear} className="font-medium text-red-400 hover:text-red-300">Confirm Clear</button>

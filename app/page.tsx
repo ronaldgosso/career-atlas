@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useLocation } from "@/hooks/use-location";
 import { useRecommendations } from "@/hooks/use-recommendations";
 import { FieldSelector } from "@/components/field-selector";
@@ -9,6 +10,10 @@ import { LoadingOrb } from "@/components/loading-orb";
 export default function Home() {
   const { status, data } = useLocation();
   const { status: recStatus, payload, error, fetchRecommendations, cancel, reset, retryCount } = useRecommendations();
+
+  const handleExportPDF = useCallback(() => {
+    window.print();
+  }, []);
 
   const handleFieldSelect = (field: string) => {
     if (data) fetchRecommendations(data, field);
@@ -131,6 +136,7 @@ export default function Home() {
                   payload={payload}
                   onReset={reset}
                   region={data?.city || "your city"}
+                  onExportPDF={handleExportPDF}
                 />
               </div>
             )}
