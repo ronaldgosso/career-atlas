@@ -35,6 +35,20 @@ const CATEGORIES: { label: string; emoji: string; fields: string[] }[] = [
             "Education & EdTech",
         ],
     },
+    {
+        label: "Engineering & Manufacturing",
+        emoji: "⚙️",
+        fields: [
+            "Engineering & Manufacturing",
+        ],
+    },
+    {
+        label: "Construction & Real Estate",
+        emoji: "🏗️",
+        fields: [
+            "Construction & Real Estate",
+        ],
+    },
 ];
 
 export function FieldSelector({

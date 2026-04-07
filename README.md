@@ -263,10 +263,10 @@ career-atlas/
 | ✅ | **Healthcare & MedTech** | Health informatics, clinical tech |
 | ✅ | **Education & EdTech** | Curriculum design, learning platforms |
 | 🔲 | **Creative Arts & Media** | Graphic design, video production, writing |
-| 🔲 | **Engineering & Manufacturing** | Mechanical, electrical, civil engineering |
+| ✅ | **Engineering & Manufacturing** | Mechanical, electrical, civil engineering |
 | 🔲 | **Hospitality & Tourism** | Hotel management, travel tech, event planning |
 | 🔲 | **Agriculture & AgriTech** | Farm management, food science, sustainability |
-| 🔲 | **Construction & Real Estate** | Architecture, property management, smart buildings |
+| ✅ | **Construction & Real Estate** | Architecture, property management, smart buildings |
 | 🔲 | **Transportation & Logistics** | Supply chain, fleet management, aviation tech |
 
 ### Regions & Locations 🌍
