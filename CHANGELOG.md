@@ -21,6 +21,45 @@ This project follows [Semantic Versioning](https://semver.org/) and keeps a huma
 
 ---
 
+## [0.3.0] — 2026-04-07
+
+### 📖 Google Books Verification
+- **Automatic book enrichment** — AI-generated book recommendations are verified and enriched via the Google Books API
+- **Verified metadata** — Author names, publisher info, and edition years are pulled from the Google Books database instead of relying on AI-generated text
+- **Permanent, stable URLs** — All book links point to `books.google.com` URLs that never rot, maintained by Google
+- **Graceful fallback** — If Google Books returns no match, the original AI-generated data is preserved with a generic Google search URL
+- **Optional API key** — Works without a key at 1,000 requests/day; add `GOOGLE_BOOKS_API_KEY` for higher quotas
+- **New library** — `lib/google-books.ts` with `searchGoogleBooks()` and `enrichBooksWithGoogleBooks()` utilities
+
+### ⚙️ Expanded Fields of Study
+- **Engineering & Manufacturing** ⚙️ — Mechanical, electrical, civil engineering careers
+- **Construction & Real Estate** 🏗️ — Architecture, property management, smart buildings
+- **18 total fields** now supported across 5 categories in the Field Selector
+
+### 🎬 Gemini Video Search Improvements
+- **Service-specific error tracking** — Gemini failures no longer block the entire request; Llama 3 fallback activates automatically
+- **Partial success handling** — If Gemini fails but other categories succeed, results are returned with a warning banner
+
+### 📄 Project Section UI Cleanup
+- **Removed "Visit" button from Projects tab** — Projects are AI-generated suggestions (not external links), so the visit button was misleading
+
+### 📜 Auto-Scroll on Field Selection
+- **Smooth scroll to loading section** — When a user selects a field, the page automatically scrolls down to show the loading activity
+- **Uses `useRef` + `useEffect`** — Clean, dependency-free scroll behavior with `scrollIntoView({ behavior: "smooth" })`
+
+### 🔧 Infrastructure
+- **CONTRIBUTING.md** — Dedicated developer onboarding guide with setup instructions, architecture overview, and contribution guidelines
+- **README.md restructured** — Features table and Quick Start kept in README; detailed contribution workflow moved to CONTRIBUTING.md
+- **CHANGELOG.md** — This release documented as v0.3.0
+
+### 🐛 Bug Fixes
+- **ESLint `prefer-const`** — Separated `booksResult` (`let`) from other `const` destructured variables in recommend route
+- **JSX closing tag** — Fixed malformed `</section >` and extra `</div>` in `page.tsx`
+- **TypeScript type inference** — Used `booksResultRaw` to preserve proper type inference when reassigning `booksResult`
+- **`isLoading` use-before-declaration** — Moved `isLoading` const above the `useEffect` that depends on it
+
+---
+
 ## [0.2.0] — 2026-04-03
 
 ###  Gemini-Powered YouTube Video Search
@@ -176,6 +215,7 @@ This project follows [Semantic Versioning](https://semver.org/) and keeps a huma
 
 ---
 
-[Unreleased]: https://github.com/ronaldgosso/career-atlas/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ronaldgosso/career-atlas/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/ronaldgosso/career-atlas/releases/tag/v0.3.0
 [0.2.0]: https://github.com/ronaldgosso/career-atlas/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ronaldgosso/career-atlas/releases/tag/v0.1.0

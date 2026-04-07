@@ -342,24 +342,13 @@ career-atlas/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full developer guide, including:
 
-1. **Fork** the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a **Pull Request**
-
-### Development Commands
-
-```bash
-npm run dev        # Start dev server (Turbopack)
-npm run build      # Full build (lint + typecheck + compile)
-npm run start      # Production server
-npm run lint       # ESLint
-npm run typecheck  # TypeScript type checking
-npm run ci         # Full CI pipeline (lint + typecheck + build)
-```
+- Development environment setup
+- Project architecture overview
+- Branch & commit conventions
+- How to open a Pull Request
+- Coding standards (TypeScript, React, Tailwind)
 
 ---
 
