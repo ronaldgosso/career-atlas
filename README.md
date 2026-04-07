@@ -313,7 +313,7 @@ career-atlas/
 
 | Status | Region | Notes |
 |---|---|---|
-| ✅ | **Tanzania** | Full support — Dar es Salaam, Dodoma, Arusha, Mwanza, Zanzibar |
+| ✅ | **Tanzania** | Full support |
 | ✅ | **Global (via GPS)** | Any city detected by Nominatim |
 | ✅ | **Manual Override** | 12 major cities (NY, London, Berlin, Tokyo, Mumbai, etc.) |
 | 🔲 | **Expanded African Regions** | Kenya, Nigeria, South Africa, Ghana, Rwanda, Ethiopia |
