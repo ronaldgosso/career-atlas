@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
         }
 
         // If some succeeded and some failed, still return partial results
-        let [booksResult, videosResult, projectsResult, onlineResourcesResult, professionalTitlesResult] =
+        const [booksResultRaw, videosResult, projectsResult, onlineResourcesResult, professionalTitlesResult] =
             categoryResults.map((r) => (r.status === "fulfilled" ? r.value : [])) as [
                 RecommendationPayload["books"],
                 RecommendationPayload["videos"],
@@ -185,6 +185,7 @@ export async function POST(req: NextRequest) {
             ];
 
         // Enrich books with Google Books API (verified metadata + stable URLs)
+        let booksResult = booksResultRaw;
         if (booksResult.length > 0 && isGoogleBooksAvailable()) {
             try {
                 const enrichedBooks = await enrichBooksWithGoogleBooks(

@@ -53,15 +53,15 @@ export default function Home() {
     if (data) fetchRecommendations(data, field, useGeminiVideos);
   };
 
+  const isReady = status === "resolved" || status === "fallback";
+  const isLoading = recStatus === "loading";
+
   // Auto-scroll to loading/results section when fetch starts
   useEffect(() => {
     if (isLoading && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [isLoading]);
-
-  const isReady = status === "resolved" || status === "fallback";
-  const isLoading = recStatus === "loading";
 
   return (
     <section className="relative mx-auto min-h-screen max-w-5xl px-4 py-8">
@@ -225,7 +225,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
-    </section >
+    </section>
   );
 }
