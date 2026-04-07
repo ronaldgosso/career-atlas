@@ -67,46 +67,49 @@ export function RecommendationsDashboard({ payload, onReset, region, field, gene
                 const items = activeTab === "books" ? books : activeTab === "videos" ? videos : activeTab === "projects" ? projects : online_resources;
                 return (
                     <div className="space-y-3">
-                        {items.map((item, index) => (
-                            <div
-                                key={index}
-                                className="group relative overflow-hidden rounded-xl border border-teal-500/10 bg-teal-950/20 p-4 transition-all duration-300 hover:scale-[1.01] hover:border-cyan-500/30 hover:bg-teal-900/30 hover:shadow-lg hover:shadow-cyan-500/5"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
-                                <div className="relative flex gap-4">
-                                    {/* Index badge */}
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 font-bold text-teal-300">
-                                        {String(index + 1).padStart(2, "0")}
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-start justify-between gap-2">
-                                            <h4 className="font-semibold text-teal-50 group-hover:text-cyan-300 transition-colors">
-                                                {item.title}
-                                            </h4>
-                                            {item.url && (
-                                                <a
-                                                    href={item.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="shrink-0 rounded-lg bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-300 transition-colors hover:bg-teal-500/20 hover:text-cyan-300"
-                                                >
-                                                    Visit →
-                                                </a>
-                                            )}
+                        {items.map((item, index) => {
+                            const showUrl = activeTab !== "projects";
+                            return (
+                                <div
+                                    key={index}
+                                    className="group relative overflow-hidden rounded-xl border border-teal-500/10 bg-teal-950/20 p-4 transition-all duration-300 hover:scale-[1.01] hover:border-cyan-500/30 hover:bg-teal-900/30 hover:shadow-lg hover:shadow-cyan-500/5"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                                    <div className="relative flex gap-4">
+                                        {/* Index badge */}
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 font-bold text-teal-300">
+                                            {String(index + 1).padStart(2, "0")}
                                         </div>
-                                        <p className="text-sm text-teal-100/60">{item.detail}</p>
-                                        <div className="rounded-lg bg-teal-950/30 p-3">
-                                            <p className="text-sm italic text-teal-50">
-                                                <span className="font-medium text-cyan-300">Why: </span>
-                                                {item.reason}
-                                            </p>
+
+                                        {/* Content */}
+                                        <div className="flex-1 space-y-2">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h4 className="font-semibold text-teal-50 group-hover:text-cyan-300 transition-colors">
+                                                    {item.title}
+                                                </h4>
+                                                {showUrl && item.url && (
+                                                    <a
+                                                        href={item.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="shrink-0 rounded-lg bg-teal-500/10 px-3 py-1.5 text-xs font-medium text-teal-300 transition-colors hover:bg-teal-500/20 hover:text-cyan-300"
+                                                    >
+                                                        Visit →
+                                                    </a>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-teal-100/60">{item.detail}</p>
+                                            <div className="rounded-lg bg-teal-950/30 p-3">
+                                                <p className="text-sm italic text-teal-50">
+                                                    <span className="font-medium text-cyan-300">Why: </span>
+                                                    {item.reason}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {/* Gemini hint when videos are AI-generated */}
                         {activeTab === "videos" && !usedGemini && (
                             <div className="mt-4 rounded-lg border border-blue-500/20 bg-blue-950/20 px-4 py-3">
