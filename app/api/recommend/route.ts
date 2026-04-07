@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { RecommendRequestSchema, type RecommendationPayload } from "@/lib/validators";
 import { callHuggingFace } from "@/lib/ai-client";
 import { isGeminiAvailable, searchYouTubeVideos } from "@/lib/gemini-youtube";
+import { enrichBooksWithGoogleBooks, isGoogleBooksAvailable } from "@/lib/google-books";
 
 export type ErrorSource = "huggingface" | "gemini" | "network" | "validation" | "unknown";
 
@@ -174,7 +175,7 @@ export async function POST(req: NextRequest) {
         }
 
         // If some succeeded and some failed, still return partial results
-        const [booksResult, videosResult, projectsResult, onlineResourcesResult, professionalTitlesResult] =
+        let [booksResult, videosResult, projectsResult, onlineResourcesResult, professionalTitlesResult] =
             categoryResults.map((r) => (r.status === "fulfilled" ? r.value : [])) as [
                 RecommendationPayload["books"],
                 RecommendationPayload["videos"],
@@ -182,6 +183,26 @@ export async function POST(req: NextRequest) {
                 RecommendationPayload["online_resources"],
                 RecommendationPayload["professional_titles"],
             ];
+
+        // Enrich books with Google Books API (verified metadata + stable URLs)
+        if (booksResult.length > 0 && isGoogleBooksAvailable()) {
+            try {
+                const enrichedBooks = await enrichBooksWithGoogleBooks(
+                    booksResult,
+                    field,
+                    controller.signal
+                );
+                booksResult = enrichedBooks.map((book) => ({
+                    title: book.title,
+                    detail: book.detail,
+                    url: book.url,
+                    reason: book.reason,
+                }));
+            } catch (err) {
+                console.warn("[Google Books Enrichment Failed]", err instanceof Error ? err.message : String(err));
+                // Keep original AI-generated books as fallback
+            }
+        }
 
         const payload: RecommendationPayload = {
             books: booksResult,
