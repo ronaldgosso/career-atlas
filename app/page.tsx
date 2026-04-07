@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { useState } from "react";
 import { useLocation } from "@/hooks/use-location";
 import { useRecommendations } from "@/hooks/use-recommendations";
@@ -44,12 +45,20 @@ const ERROR_CONFIG: Record<string, { icon: string; color: string; bg: string; bo
 
 export default function Home() {
   const [useGemini, setUseGemini] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const { status, data } = useLocation();
   const { status: recStatus, payload, error, errorSource, errorDetails, warnings, fetchRecommendations, cancel, reset } = useRecommendations();
 
   const handleFieldSelect = (field: string, useGeminiVideos: boolean) => {
     if (data) fetchRecommendations(data, field, useGeminiVideos);
   };
+
+  // Auto-scroll to loading/results section when fetch starts
+  useEffect(() => {
+    if (isLoading && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [isLoading]);
 
   const isReady = status === "resolved" || status === "fallback";
   const isLoading = recStatus === "loading";
@@ -102,117 +111,121 @@ export default function Home() {
               disabled={isLoading}
             />
 
-            {/* Loading State */}
-            {isLoading && (
-              <div className="relative overflow-hidden rounded-2xl border border-teal-500/20 bg-teal-950/30 p-8 backdrop-blur-sm">
-                <div className="flex flex-col items-center space-y-6">
-                  <LoadingOrb />
-                  <div className="space-y-3 text-center">
-                    <p className="text-lg font-medium text-white animate-pulse">Crafting your career map...</p>
-                    <p className="text-sm text-teal-200/60">Analyzing opportunities in {data?.city}</p>
-                    <div className="flex items-center justify-center gap-2 text-xs text-teal-300/50">
-                      <span className="rounded-full bg-teal-500/10 px-3 py-1">AI Processing</span>
-                      <span>•</span>
-                      <span>~15-30 seconds</span>
-                    </div>
-                  </div>
-                  {/* Wave progress indicator */}
-                  <div className="flex gap-1.5">
-                    {[...Array(5)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-1.5 w-10 rounded-full bg-teal-500/20 animate-[pulse_1s_ease-in-out_infinite]"
-                        style={{ animationDelay: `${i * 0.15}s` }}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={cancel}
-                    className="text-xs text-amber-400 hover:text-amber-300 transition-colors underline underline-offset-4"
-                  >
-                    Cancel request
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Error State */}
-            {recStatus === "error" && (() => {
-              const cfg = ERROR_CONFIG[errorSource] || ERROR_CONFIG.network;
-              const retryGeminiOff = errorSource === "gemini";
-              return (
-                <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                  <div className={`rounded-xl border ${cfg.borderColor} ${cfg.bg} p-6 backdrop-blur-sm`}>
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-2xl">
-                        {cfg.icon}
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <h3 className={`font-semibold ${cfg.color}`}>{cfg.title}</h3>
-                          <p className="mt-1.5 text-sm text-neutral-300/80 leading-relaxed">{error}</p>
-                          {errorDetails && (
-                            <p className="mt-1 text-xs text-neutral-400/60 font-mono bg-black/20 rounded-lg px-3 py-2">{errorDetails}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleFieldSelect("IT", retryGeminiOff ? false : useGemini)}
-                            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${cfg.bg.replace("/20", "/30")} ${cfg.color.replace("text-", "text-")} border ${cfg.borderColor} hover:brightness-125`}
-                          >
-                            {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Llama fallback)</span>}
-                          </button>
-                          {errorSource === "huggingface" && (
-                            <a
-                              href="https://huggingface.co/settings/tokens"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-neutral-400 hover:text-neutral-300 underline underline-offset-2"
-                            >
-                              Check API key
-                            </a>
-                          )}
-                        </div>
+            {/* Scroll Target - Loading / Error / Results */}
+            <div ref={resultsRef} className="space-y-6">
+              {/* Loading State */}
+              {isLoading && (
+                <div className="relative overflow-hidden rounded-2xl border border-teal-500/20 bg-teal-950/30 p-8 backdrop-blur-sm">
+                  <div className="flex flex-col items-center space-y-6">
+                    <LoadingOrb />
+                    <div className="space-y-3 text-center">
+                      <p className="text-lg font-medium text-white animate-pulse">Crafting your career map...</p>
+                      <p className="text-sm text-teal-200/60">Analyzing opportunities in {data?.city}</p>
+                      <div className="flex items-center justify-center gap-2 text-xs text-teal-300/50">
+                        <span className="rounded-full bg-teal-500/10 px-3 py-1">AI Processing</span>
+                        <span>•</span>
+                        <span>~15-30 seconds</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Partial Success Warnings */}
-            {recStatus === "success" && payload && warnings.length > 0 && (
-              <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg">⚠️</span>
-                  <div>
-                    <p className="text-sm font-medium text-amber-300">Some services had issues</p>
-                    <ul className="mt-1 text-xs text-amber-200/60 space-y-1">
-                      {warnings.map((w, i) => (
-                        <li key={i}>• {w}</li>
+                    {/* Wave progress indicator */}
+                    <div className="flex gap-1.5">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="h-1.5 w-10 rounded-full bg-teal-500/20 animate-[pulse_1s_ease-in-out_infinite]"
+                          style={{ animationDelay: `${i * 0.15}s` }}
+                        />
                       ))}
-                    </ul>
+                    </div>
+                    <button
+                      onClick={cancel}
+                      className="text-xs text-amber-400 hover:text-amber-300 transition-colors underline underline-offset-4"
+                    >
+                      Cancel request
+                    </button>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Success State - Dashboard */}
-            {recStatus === "success" && payload && (
-              <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-                <RecommendationsDashboard
-                  payload={payload}
-                  onReset={reset}
-                  region={data?.city || "your city"}
-                  field={payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
-                  generatedAt={Date.now()}
-                  usedGemini={useGemini}
-                />
-              </div>
-            )}
+              {/* Error State */}
+              {recStatus === "error" && (() => {
+                const cfg = ERROR_CONFIG[errorSource] || ERROR_CONFIG.network;
+                const retryGeminiOff = errorSource === "gemini";
+                return (
+                  <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className={`rounded-xl border ${cfg.borderColor} ${cfg.bg} p-6 backdrop-blur-sm`}>
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-2xl">
+                          {cfg.icon}
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <h3 className={`font-semibold ${cfg.color}`}>{cfg.title}</h3>
+                            <p className="mt-1.5 text-sm text-neutral-300/80 leading-relaxed">{error}</p>
+                            {errorDetails && (
+                              <p className="mt-1 text-xs text-neutral-400/60 font-mono bg-black/20 rounded-lg px-3 py-2">{errorDetails}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleFieldSelect("IT", retryGeminiOff ? false : useGemini)}
+                              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${cfg.bg.replace("/20", "/30")} ${cfg.color.replace("text-", "text-")} border ${cfg.borderColor} hover:brightness-125`}
+                            >
+                              {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Llama fallback)</span>}
+                            </button>
+                            {errorSource === "huggingface" && (
+                              <a
+                                href="https://huggingface.co/settings/tokens"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-neutral-400 hover:text-neutral-300 underline underline-offset-2"
+                              >
+                                Check API key
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Partial Success Warnings */}
+              {recStatus === "success" && payload && warnings.length > 0 && (
+                <div className="rounded-xl border border-amber-500/20 bg-amber-950/20 px-4 py-3">
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">⚠️</span>
+                    <div>
+                      <p className="text-sm font-medium text-amber-300">Some services had issues</p>
+                      <ul className="mt-1 text-xs text-amber-200/60 space-y-1">
+                        {warnings.map((w, i) => (
+                          <li key={i}>• {w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Success State - Dashboard */}
+              {recStatus === "success" && payload && (
+                <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
+                  <RecommendationsDashboard
+                    payload={payload}
+                    onReset={reset}
+                    region={data?.city || "your city"}
+                    field={payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
+                    generatedAt={Date.now()}
+                    usedGemini={useGemini}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
-    </section>
+    </div>
+    </section >
   );
 }
