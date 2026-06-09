@@ -104,12 +104,20 @@ export default function Home() {
         ) : (
           <div className="space-y-6">
             {/* Field Selector */}
-            <FieldSelector
-              onFieldSelect={handleFieldSelect}
-              useGemini={useGemini}
-              onGeminiToggle={() => setUseGemini((v) => !v)}
-              disabled={isLoading}
-            />
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="h-24 rounded-xl bg-teal-950/30 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <FieldSelector
+                onFieldSelect={handleFieldSelect}
+                useGemini={useGemini}
+                onGeminiToggle={() => setUseGemini((v) => !v)}
+                disabled={isLoading}
+              />
+            )}
 
             {/* Scroll Target - Loading / Error / Results */}
             <div ref={resultsRef} className="space-y-6">

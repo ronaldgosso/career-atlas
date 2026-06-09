@@ -21,13 +21,33 @@ const FALLBACK_GEO: GeoData = {
   lon: 0,
 };
 
+// In-memory cache to prevent concurrent duplicate requests
+const locationCache = new Map<string, Promise<GeoData>>();
+
 async function fetchFromAPI(lat?: number, lon?: number): Promise<GeoData> {
+  const cacheKey = lat !== undefined && lon !== undefined ? `${lat},${lon}` : "ip";
+  
+  // Return cached promise if request is in flight
+  if (locationCache.has(cacheKey)) {
+    return locationCache.get(cacheKey)!;
+  }
+  
   const params = new URLSearchParams();
   if (lat !== undefined) params.set("lat", String(lat));
   if (lon !== undefined) params.set("lon", String(lon));
-  const res = await fetch(`/api/location?${params.toString()}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  
+  const promise = fetch(`/api/location?${params.toString()}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .finally(() => {
+      // Remove from cache after request completes
+      locationCache.delete(cacheKey);
+    });
+  
+  locationCache.set(cacheKey, promise);
+  return promise;
 }
 
 export function useLocation() {

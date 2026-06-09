@@ -7,7 +7,7 @@ const IP_API_URL = "https://ipapi.co/json/";
 async function fetchIPGeo(): Promise<Record<string, unknown>> {
   const res = await fetch(IP_API_URL, {
     headers: { "Accept-Language": "en" },
-    next: { revalidate: 86400 },
+    next: { revalidate: 604800 }, // 7 days instead of 24 hours
   });
   if (!res.ok) throw new Error(`IP API HTTP ${res.status}`);
   const data = await res.json();
@@ -26,7 +26,7 @@ async function fetchReverseGeo(lat: number, lon: number): Promise<Record<string,
     `${NOMINATIM_URL}?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
     {
       headers: { "Accept-Language": "en", "User-Agent": "career-atlas/1.0 (educational)" },
-      next: { revalidate: 86400 },
+      next: { revalidate: 604800 }, // 7 days instead of 24 hours
     }
   );
   if (!res.ok) throw new Error(`Nominatim HTTP ${res.status}`);
