@@ -50,7 +50,16 @@ async function fetchCategory(
     }
 
     try {
-        const json = JSON.parse(result.trim());
+        // Extract JSON array from response (handle conversational text before/after JSON)
+        const firstBracket = result.indexOf('[');
+        const lastBracket = result.lastIndexOf(']');
+        
+        let jsonStr = result.trim();
+        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+            jsonStr = result.substring(firstBracket, lastBracket + 1);
+        }
+        
+        const json = JSON.parse(jsonStr);
         return Array.isArray(json) ? json : [];
     } catch {
         return [];
