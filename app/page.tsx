@@ -9,8 +9,8 @@ import { RecommendationsDashboard } from "@/components/recommendations-dashboard
 import { LoadingOrb } from "@/components/loading-orb";
 
 const ERROR_CONFIG: Record<string, { icon: string; color: string; bg: string; borderColor: string; title: string; actionLabel: string }> = {
-  huggingface: {
-    icon: "🤖",
+  mistral: {
+    icon: "🌪️",
     color: "text-amber-400",
     bg: "bg-amber-950/20",
     borderColor: "border-amber-500/20",
@@ -179,11 +179,11 @@ export default function Home() {
                               onClick={() => handleFieldSelect("IT", retryGeminiOff ? false : useGemini)}
                               className={`rounded-lg px-4 py-2 text-sm font-medium transition ${cfg.bg.replace("/20", "/30")} ${cfg.color.replace("text-", "text-")} border ${cfg.borderColor} hover:brightness-125`}
                             >
-                              {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Llama fallback)</span>}
+                              {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Mistral fallback)</span>}
                             </button>
-                            {errorSource === "huggingface" && (
+                            {errorSource === "mistral" && (
                               <a
-                                href="https://huggingface.co/settings/tokens"
+                                href="https://console.mistral.ai/api-keys/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xs text-neutral-400 hover:text-neutral-300 underline underline-offset-2"

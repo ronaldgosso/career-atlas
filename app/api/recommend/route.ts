@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RecommendRequestSchema, type RecommendationPayload } from "@/lib/validators";
-import { callHuggingFace } from "@/lib/ai-client";
+import { callMistral } from "@/lib/ai-client";
 import { isGeminiAvailable, searchYouTubeVideos } from "@/lib/gemini-youtube";
 import { enrichBooksWithGoogleBooks, isGoogleBooksAvailable } from "@/lib/google-books";
 
-export type ErrorSource = "huggingface" | "gemini" | "network" | "validation" | "unknown";
+export type ErrorSource = "mistral" | "gemini" | "network" | "validation" | "unknown";
 
 interface ErrorResponse {
     error: string;
@@ -38,7 +38,7 @@ async function fetchCategory(
         .replace("{region}", region)
         .replace("{field}", field);
 
-    const stream = await callHuggingFace(prompt, signal);
+    const stream = await callMistral(prompt, signal);
     if (!stream) throw new Error(`Failed to fetch ${category}: AI stream unavailable`);
 
     const reader = stream.getReader();
@@ -66,25 +66,38 @@ async function fetchCategory(
     }
 }
 
-function classifyHuggingFaceError(err: unknown): string {
+function classifyMistralError(err: unknown): string {
     const rawMsg = err instanceof Error ? err.message : String(err);
-    const msg = rawMsg || "Unknown Hugging Face error";
+    const msg = rawMsg || "Unknown Mistral AI error";
     const lower = msg.toLowerCase();
 
-    if (lower.includes("401") || lower.includes("403") || lower.includes("unauthorized") || lower.includes("token")) {
-        return "Invalid or expired API token. Check your HUGGINGFACE_API_KEY.";
+    if (
+        lower.includes("401") ||
+        lower.includes("403") ||
+        lower.includes("unauthorized") ||
+        lower.includes("token") ||
+        lower.includes("api key") ||
+        lower.includes("mistral_api_key missing")
+    ) {
+        return "Invalid or missing API key. Check your MISTRAL_API_KEY.";
     }
-    if (lower.includes("429") || lower.includes("rate limit") || lower.includes("too many")) {
-        return "Rate limit exceeded. Hugging Face is throttling requests. Wait a moment and retry.";
+    if (lower.includes("429") || lower.includes("rate limit") || lower.includes("too many") || lower.includes("quota")) {
+        return "Rate limit or quota exceeded. Mistral AI is throttling requests. Wait a moment and retry.";
     }
-    if (lower.includes("503") || lower.includes("model loading") || lower.includes("model is currently loading") || lower.includes("overloaded")) {
-        return "Model is loading or overloaded. The Llama 3 model is temporarily unavailable on Hugging Face. Retry in a minute.";
+    if (
+        lower.includes("503") ||
+        lower.includes("500") ||
+        lower.includes("502") ||
+        lower.includes("overloaded") ||
+        lower.includes("service unavailable")
+    ) {
+        return "Mistral AI service is temporarily overloaded or unavailable. Retry in a moment.";
     }
-    if (lower.includes("404") || lower.includes("not found") || lower.includes("model not found")) {
-        return "Model not found. The configured Hugging Face model endpoint is incorrect.";
+    if (lower.includes("404") || lower.includes("model not found")) {
+        return "Model not found. The configured Mistral AI model is invalid or unavailable.";
     }
     if (msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED") || lower.includes("network")) {
-        return "Network error. Cannot reach Hugging Face API. Check your internet connection.";
+        return "Network error. Cannot reach Mistral AI API. Check your internet connection.";
     }
     return msg;
 }
@@ -133,42 +146,54 @@ export async function POST(req: NextRequest) {
     try {
         const controller = new AbortController();
 
-        // Decide video source: Gemini (real YouTube) or Llama (AI-generated)
+        // Decide video source: Gemini (real YouTube) or Mistral (AI-generated)
         const fetchVideos = async () => {
             if (use_gemini && isGeminiAvailable()) {
                 try {
                     const geminiVideos = await searchYouTubeVideos(field, region, controller.signal);
                     if (geminiVideos.length > 0) return geminiVideos;
                     // Gemini returned empty — not an error, just no results
-                    console.warn("[Gemini returned 0 videos, falling back to Llama]");
+                    console.warn("[Gemini returned 0 videos, falling back to Mistral]");
                 } catch (err) {
                     const geminiMsg = classifyGeminiError(err);
                     console.warn("[Gemini Video Search Failed]", geminiMsg);
                     serviceErrors.push({ source: "gemini", message: geminiMsg });
-                    // Fall through to Llama fallback
+                    // Fall through to Mistral fallback
                 }
             }
-            // Fallback to Llama-generated video recommendations
+            // Fallback to Mistral-generated video recommendations
             return fetchCategory("videos", region, field, controller.signal);
         };
 
-        // Fetch all categories in parallel — track which ones fail
-        const categoryResults = await Promise.allSettled([
-            fetchCategory("books", region, field, controller.signal) as Promise<RecommendationPayload["books"]>,
-            fetchVideos() as Promise<RecommendationPayload["videos"]>,
-            fetchCategory("projects", region, field, controller.signal) as Promise<RecommendationPayload["projects"]>,
-            fetchCategory("online_resources", region, field, controller.signal) as Promise<RecommendationPayload["online_resources"]>,
-            fetchCategory("professional_titles", region, field, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
-        ]);
+        // Fetch all categories sequentially to respect Mistral rate limits
+        const categoryTasks = [
+            () => fetchCategory("books", region, field, controller.signal) as Promise<RecommendationPayload["books"]>,
+            () => fetchVideos() as Promise<RecommendationPayload["videos"]>,
+            () => fetchCategory("projects", region, field, controller.signal) as Promise<RecommendationPayload["projects"]>,
+            () => fetchCategory("online_resources", region, field, controller.signal) as Promise<RecommendationPayload["online_resources"]>,
+            () => fetchCategory("professional_titles", region, field, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
+        ];
+
+        const categoryResults: PromiseSettledResult<unknown>[] = [];
+        for (const task of categoryTasks) {
+            try {
+                const res = await task();
+                categoryResults.push({ status: "fulfilled", value: res });
+            } catch (err) {
+                categoryResults.push({ status: "rejected", reason: err });
+            }
+            // Small pause between categories to stay within Mistral rate limit
+            await new Promise((r) => setTimeout(r, 150));
+        }
 
         // Separate successes and failures
         const successes = categoryResults.filter((r) => r.status === "fulfilled");
         const failures = categoryResults.filter((r): r is PromiseRejectedResult => r.status === "rejected");
 
-        // Record Hugging Face errors
+        // Record Mistral AI errors
         for (const f of failures) {
-            const msg = classifyHuggingFaceError(f.reason);
-            serviceErrors.push({ source: "huggingface", message: msg });
+            const msg = classifyMistralError(f.reason);
+            serviceErrors.push({ source: "mistral", message: msg });
         }
 
         // If ALL categories failed, return an error response
@@ -240,7 +265,7 @@ export async function POST(req: NextRequest) {
     } catch (err: unknown) {
         // Top-level unhandled error
         const msg = err instanceof Error ? err.message : "Unknown error";
-        const source: ErrorSource = msg.toLowerCase().includes("gemini") ? "gemini" : msg.toLowerCase().includes("hugging") ? "huggingface" : "unknown";
+        const source: ErrorSource = msg.toLowerCase().includes("gemini") ? "gemini" : msg.toLowerCase().includes("mistral") ? "mistral" : "unknown";
         console.error("[AI Route Error]", msg);
         const body: ErrorResponse = { error: msg, source, details: "Unexpected server error" };
         return NextResponse.json(body, { status: 500 });

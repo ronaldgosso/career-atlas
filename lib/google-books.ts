@@ -73,7 +73,7 @@ export async function searchGoogleBooks(
 
 /**
  * Enrich AI-generated book recommendations with verified Google Books metadata.
- * Takes raw book titles from Llama 3, searches Google Books, and returns
+ * Takes raw book titles from Mistral AI, searches Google Books, and returns
  * enriched data with stable URLs, authors, descriptions, and cover images.
  *
  * Falls back to the original AI-generated data if Google Books returns no results.
@@ -120,6 +120,9 @@ export async function enrichBooksWithGoogleBooks(
                 reason: book.reason,
             });
         }
+
+        // Small pause between book queries to reduce chance of Google Books IP 429
+        await new Promise((r) => setTimeout(r, 150));
     }
 
     return enriched;

@@ -21,6 +21,17 @@ This project follows [Semantic Versioning](https://semver.org/) and keeps a huma
 
 ---
 
+## [0.4.0] — 2026-08-15
+
+### 🌪️ Mistral AI Migration
+- **Replaced HuggingFace with Mistral AI** — Switched inference provider to Mistral AI (`mistral-small-latest`)
+- **Native Streaming SSE Client** — Built a resilient streaming client in `lib/ai-client.ts` with exponential backoff and abort handling
+- **Cleaned Dependencies** — Removed `@huggingface/inference` dependency from `package.json` and `next.config.ts`
+- **Updated Error Handling** — Added Mistral-specific error classification and direct console links in the UI error card
+- **Updated Documentation** — Updated `.env.example`, `README.md`, and `CONTRIBUTING.md` to reference `MISTRAL_API_KEY`
+
+---
+
 ## [0.3.0] — 2026-04-07
 
 ### 📖 Google Books Verification

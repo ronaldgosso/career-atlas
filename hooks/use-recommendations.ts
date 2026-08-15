@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { GeoData, type RecommendationPayload } from "@/lib/validators";
 import { getDB } from "@/lib/db";
 
-export type ErrorSource = "huggingface" | "gemini" | "network" | "validation" | "unknown";
+export type ErrorSource = "mistral" | "gemini" | "network" | "validation" | "unknown";
 
 type Status = "idle" | "loading" | "streaming" | "success" | "error";
 

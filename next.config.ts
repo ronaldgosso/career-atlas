@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
   // Optimize compilation with code splitting
   experimental: {
-    optimizePackageImports: ['@huggingface/inference', 'jspdf'],
+    optimizePackageImports: ['jspdf'],
   },
 };
 

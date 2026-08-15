@@ -32,7 +32,7 @@ Edit `.env.local` and add your API keys:
 
 ```env
 # Required — AI recommendations
-HUGGINGFACE_API_KEY=hf_your_token_here
+MISTRAL_API_KEY=your_mistral_api_key_here
 
 # Optional — Real YouTube video search
 GOOGLE_GEMINI_API_KEY=AIzaSy...
@@ -41,7 +41,7 @@ GOOGLE_GEMINI_API_KEY=AIzaSy...
 GOOGLE_BOOKS_API_KEY=AIzaSy...
 ```
 
-> - Get a free Hugging Face token at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+> - Get a Mistral API key at [console.mistral.ai/api-keys](https://console.mistral.ai/api-keys)
 > - Get a free Gemini API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 > - Get a free Google Books API key at [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) (enable "Books API")
 
@@ -87,7 +87,7 @@ career-atlas/
 │   ├── use-location.ts           # GPS → Nominatim → IP resolution
 │   └── use-recommendations.ts    # AI fetch lifecycle with retry
 ├── lib/
-│   ├── ai-client.ts              # Hugging Face streaming client
+│   ├── ai-client.ts              # Mistral AI streaming client
 │   ├── ai-stream-parser.ts       # JSON stream parser
 │   ├── cache-manager.ts          # IndexedDB CRUD helpers
 │   ├── db.ts                     # IndexedDB initialization
@@ -109,9 +109,9 @@ career-atlas/
 
 1. **Location Detection** → Browser GPS → Nominatim reverse geocoding → IP fallback
 2. **Field Selection** → User picks a field of study from the categorized grid
-3. **AI Generation** → 5 parallel Hugging Face calls (Books, Videos, Projects, Courses, Titles)
+3. **AI Generation** → 5 parallel Mistral AI calls (Books, Videos, Projects, Courses, Titles)
 4. **Book Enrichment** → Google Books API verifies and adds metadata + permanent URLs
-5. **Video Enrichment** → Optional Gemini search for real YouTube URLs (or Llama 3 fallback)
+5. **Video Enrichment** → Optional Gemini search for real YouTube URLs (or Mistral fallback)
 6. **Display** → Results rendered in tabbed dashboard
 7. **Persistence** → All results saved to IndexedDB for offline access
 
@@ -120,7 +120,7 @@ career-atlas/
 - **Offline-first** → All recommendations are cached in IndexedDB. The dashboard works without network.
 - **Graceful degradation** → If any AI service fails, partial results are returned with warnings.
 - **Server-side proxies** → Geolocation requests go through `/api/location` to avoid CORS issues.
-- **Streaming AI responses** → Hugging Face responses are streamed, not polled.
+- **Streaming AI responses** → Mistral AI responses are streamed and parsed.
 
 ---
 
