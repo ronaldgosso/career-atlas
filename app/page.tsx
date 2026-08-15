@@ -1,13 +1,15 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useLocation } from "@/hooks/use-location";
 import { useRecommendations } from "@/hooks/use-recommendations";
 import { FieldSelector } from "@/components/field-selector";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { LoadingOrb } from "@/components/loading-orb";
-import { Compass, Clapperboard, AlertTriangle, Globe } from "lucide-react";
+import { CachedResultsModal } from "@/components/cached-results-modal";
+import { getCachedRecommendations } from "@/lib/cache-manager";
+import type { RecommendationRecord } from "@/lib/db";
+import { Compass, Clapperboard, AlertTriangle, Globe, Database } from "lucide-react";
 
 const ERROR_CONFIG: Record<string, { Icon: React.ElementType; color: string; bg: string; borderColor: string; title: string; actionLabel: string }> = {
   mistral: {
@@ -46,12 +48,43 @@ const ERROR_CONFIG: Record<string, { Icon: React.ElementType; color: string; bg:
 
 export default function Home() {
   const [useGemini, setUseGemini] = useState(false);
+  const [isCacheOpen, setIsCacheOpen] = useState(false);
+  const [cachedCount, setCachedCount] = useState(0);
+  const [selectedCachedRecord, setSelectedCachedRecord] = useState<RecommendationRecord | null>(null);
+
   const resultsRef = useRef<HTMLDivElement>(null);
   const { status, data } = useLocation();
-  const { status: recStatus, payload, error, errorSource, errorDetails, warnings, isFromCache, fetchRecommendations, cancel, reset } = useRecommendations();
+  const { status: recStatus, payload, error, errorSource, errorDetails, warnings, isFromCache, fetchRecommendations, loadCachedPayload, cancel, reset } = useRecommendations();
+
+  const refreshCacheCount = useCallback(async () => {
+    try {
+      const records = await getCachedRecommendations();
+      setCachedCount(records.length);
+    } catch (e) {
+      console.warn("Failed to load cache count", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshCacheCount();
+  }, [refreshCacheCount, recStatus]);
 
   const handleFieldSelect = (field: string, useGeminiVideos: boolean) => {
+    setSelectedCachedRecord(null);
     if (data) fetchRecommendations(data, field, useGeminiVideos);
+  };
+
+  const handleSelectCachedRecord = (record: RecommendationRecord) => {
+    setSelectedCachedRecord(record);
+    loadCachedPayload(record);
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+  const handleReset = () => {
+    setSelectedCachedRecord(null);
+    reset();
   };
 
   const isReady = status === "resolved" || status === "fallback";
@@ -98,8 +131,23 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Quick Status Pill */}
+            {/* Quick Status & Cache Action */}
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsCacheOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-950/60 px-3 py-1.5 text-xs font-semibold text-teal-200 hover:bg-teal-900/70 hover:text-white hover:border-teal-400 active:scale-95 transition-all shadow-sm cursor-pointer"
+                title="View cached career intelligence dossiers"
+              >
+                <Database className="h-3.5 w-3.5 text-teal-300" />
+                <span>Cache</span>
+                {cachedCount > 0 && (
+                  <span className="rounded-full bg-teal-500/20 px-1.5 py-0.2 text-[10px] font-mono text-teal-300 font-bold border border-teal-500/30">
+                    {cachedCount}
+                  </span>
+                )}
+              </button>
+
               <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900/80 border border-teal-500/20 px-3 py-1.5 text-xs text-teal-200">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 {data ? `${data.city}, ${data.countryCode}` : "Detecting Location..."}
@@ -231,10 +279,10 @@ export default function Home() {
                 <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
                   <RecommendationsDashboard
                     payload={payload}
-                    onReset={reset}
-                    region={data?.city || "your city"}
-                    field={payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
-                    generatedAt={Date.now()}
+                    onReset={handleReset}
+                    region={selectedCachedRecord?.location?.city || data?.city || "your city"}
+                    field={selectedCachedRecord?.field || payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
+                    generatedAt={selectedCachedRecord?.generatedAt || Date.now()}
                     usedGemini={useGemini}
                     isFromCache={isFromCache}
                   />
@@ -244,6 +292,14 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Cached Results Modal */}
+      <CachedResultsModal
+        isOpen={isCacheOpen}
+        onClose={() => setIsCacheOpen(false)}
+        onSelectRecord={handleSelectCachedRecord}
+        onCacheUpdated={refreshCacheCount}
+      />
     </section>
   );
 }

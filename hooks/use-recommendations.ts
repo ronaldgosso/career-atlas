@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { GeoData, type RecommendationPayload } from "@/lib/validators";
 import { getValidCachedRecommendation, saveRecommendationToDB } from "@/lib/cache-manager";
+import type { RecommendationRecord } from "@/lib/db";
 
 export type ErrorSource = "mistral" | "gemini" | "network" | "validation" | "unknown";
 
@@ -136,6 +137,20 @@ export function useRecommendations() {
         }
     }, []);
 
+    const loadCachedPayload = useCallback((record: RecommendationRecord) => {
+        if (abortRef.current) abortRef.current.abort();
+        setState({
+            status: "success",
+            payload: record.data,
+            error: null,
+            errorSource: "unknown",
+            errorDetails: null,
+            warnings: record.data?.metadata?.warnings || [],
+            retryCount: 0,
+            isFromCache: true,
+        });
+    }, []);
+
     const cancel = useCallback(() => abortRef.current?.abort(), []);
     const reset = useCallback(() => setState({
         status: "idle",
@@ -145,7 +160,8 @@ export function useRecommendations() {
         errorDetails: null,
         retryCount: 0,
         warnings: [],
+        isFromCache: false,
     }), []);
 
-    return { ...state, fetchRecommendations, cancel, reset };
+    return { ...state, fetchRecommendations, loadCachedPayload, cancel, reset };
 }
