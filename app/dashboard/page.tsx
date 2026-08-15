@@ -7,8 +7,9 @@ import { type RecommendationRecord } from "@/lib/db";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { CacheControls } from "@/components/cache-controls";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { LocationSwitcher } from "@/components/location-switcher";
 import { exportRecommendationToPDF } from "@/lib/pdf-export";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, ArrowLeft } from "lucide-react";
 
 export default function DashboardPage() {
   const [records, setRecords] = useState<RecommendationRecord[]>([]);
@@ -38,19 +39,33 @@ export default function DashboardPage() {
       {/* Executive Header Banner */}
       <div className="rounded-3xl border border-teal-500/20 bg-slate-950/80 p-6 backdrop-blur-xl shadow-xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              Talent Dossier Vault
-            </h1>
-            <span className="rounded-full bg-teal-500/10 border border-teal-500/25 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
-              Offline Cache
-            </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-teal-500/30 bg-teal-950/50 text-teal-300 hover:bg-teal-900/60 hover:text-white transition-all shadow-sm"
+              title="Back to Career Atlas"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+                  Talent Dossier Vault
+                </h1>
+                <span className="rounded-full bg-teal-500/10 border border-teal-500/25 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
+                  Offline Cache
+                </span>
+              </div>
+              <p className="text-xs text-teal-200/60 mt-0.5">
+                Review, export, and manage locally cached candidate career intelligence. Zero network required.
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-teal-200/60 mt-1">
-            Review, export, and manage locally cached candidate career intelligence. Zero network required.
-          </p>
         </div>
-        <CacheControls records={records} />
+        <div className="flex flex-wrap items-center gap-3">
+          <LocationSwitcher />
+          <CacheControls records={records} />
+        </div>
       </div>
 
       <OfflineIndicator />

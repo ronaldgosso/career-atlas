@@ -7,6 +7,7 @@ import { FieldSelector } from "@/components/field-selector";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { LoadingOrb } from "@/components/loading-orb";
 import { CachedResultsModal } from "@/components/cached-results-modal";
+import { LocationSwitcher } from "@/components/location-switcher";
 import { getCachedRecommendations } from "@/lib/cache-manager";
 import type { RecommendationRecord } from "@/lib/db";
 import { Compass, Clapperboard, AlertTriangle, Globe, Database } from "lucide-react";
@@ -136,7 +137,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setIsCacheOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-950/60 px-3 py-1.5 text-xs font-semibold text-teal-200 hover:bg-teal-900/70 hover:text-white hover:border-teal-400 active:scale-95 transition-all shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-950/60 px-3 py-2 text-xs font-semibold text-teal-200 hover:bg-teal-900/70 hover:text-white hover:border-teal-400 active:scale-95 transition-all shadow-sm cursor-pointer"
                 title="View cached career intelligence dossiers"
               >
                 <Database className="h-3.5 w-3.5 text-teal-300" />
@@ -148,10 +149,7 @@ export default function Home() {
                 )}
               </button>
 
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900/80 border border-teal-500/20 px-3 py-1.5 text-xs text-teal-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {data ? `${data.city}, ${data.countryCode}` : "Detecting Location..."}
-              </span>
+              <LocationSwitcher />
             </div>
           </div>
         </header>
