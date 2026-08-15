@@ -22,8 +22,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className="min-h-dvh flex flex-col">
+        <html lang="en" suppressHydrationWarning>
+            <body className="min-h-dvh flex flex-col" suppressHydrationWarning>
                 <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-[var(--bg-primary)]/80 backdrop-blur-md">
                     <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
                         <div className="flex items-center gap-6">

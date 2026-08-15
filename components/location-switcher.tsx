@@ -60,7 +60,7 @@ export function LocationSwitcher() {
             </div>
             <ul className="max-h-80 space-y-0.5 overflow-y-auto p-2 scrollbar-thin scrollbar-track-slate-900 scrollbar-thumb-teal-700">
               {COMMON_LOCALES.map((loc) => (
-                <li key={loc.countryCode}>
+                <li key={`${loc.city}-${loc.countryCode}`}>
                   <button
                     onClick={() => handleLocationSelect(loc)}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-teal-100/80 transition-all hover:bg-teal-900/30 hover:text-white"
