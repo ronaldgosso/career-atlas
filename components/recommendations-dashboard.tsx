@@ -20,9 +20,10 @@ interface Props {
     field?: string;
     generatedAt?: number;
     usedGemini?: boolean;
+    isFromCache?: boolean;
 }
 
-export function RecommendationsDashboard({ payload, onReset, region, field, generatedAt, usedGemini = false }: Props) {
+export function RecommendationsDashboard({ payload, onReset, region, field, generatedAt, usedGemini = false, isFromCache = false }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>("books");
 
     const handleExportPDF = () => {
@@ -157,7 +158,14 @@ export function RecommendationsDashboard({ payload, onReset, region, field, gene
                             </svg>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-teal-50">Recommendations for {region}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-teal-50">Recommendations for {region}</p>
+                                {isFromCache && (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[10px] font-medium text-teal-300">
+                                        ⚡ Cached
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-xs text-teal-200/50">Generated {new Date(metadata.generated_at).toLocaleDateString()}</p>
                         </div>
                     </div>

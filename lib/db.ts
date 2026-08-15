@@ -47,4 +47,5 @@ export async function saveLocationToDB(data: Omit<LocationRecord, "id" | "update
   await db.put("locationCache", { ...data, id: "primary", updatedAt: Date.now() });
 }
 
-export const LOCATION_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+export const LOCATION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+export const RECOMMENDATION_TTL_MS = 1000 * 60 * 60; // 1 hour

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { GeoData, type RecommendationPayload } from "@/lib/validators";
-import { getDB } from "@/lib/db";
+import { getValidCachedRecommendation, saveRecommendationToDB } from "@/lib/cache-manager";
 
 export type ErrorSource = "mistral" | "gemini" | "network" | "validation" | "unknown";
 
@@ -16,6 +16,7 @@ interface RecState {
     errorDetails: string | null;
     retryCount: number;
     warnings: string[];
+    isFromCache?: boolean;
 }
 
 export function useRecommendations() {
@@ -27,13 +28,36 @@ export function useRecommendations() {
         errorDetails: null,
         retryCount: 0,
         warnings: [],
+        isFromCache: false,
     });
     const abortRef = useRef<AbortController | null>(null);
 
-    const fetchRecommendations = useCallback(async (location: GeoData, field: string, useGemini = false) => {
+    const fetchRecommendations = useCallback(async (location: GeoData, field: string, useGemini = false, forceRefresh = false) => {
         if (abortRef.current) abortRef.current.abort();
         const controller = new AbortController();
         abortRef.current = controller;
+
+        // 1. Check offline cache (1-hour TTL) before making network request
+        if (!forceRefresh) {
+            try {
+                const cached = await getValidCachedRecommendation(location, field);
+                if (cached && cached.data) {
+                    setState({
+                        status: "success",
+                        payload: cached.data,
+                        error: null,
+                        errorSource: "unknown",
+                        errorDetails: null,
+                        warnings: cached.data.metadata?.warnings || [],
+                        retryCount: 0,
+                        isFromCache: true,
+                    });
+                    return;
+                }
+            } catch (cacheErr) {
+                console.warn("[Offline Cache Check Failed]", cacheErr);
+            }
+        }
 
         setState((prev) => ({
             ...prev,
@@ -44,6 +68,7 @@ export function useRecommendations() {
             errorDetails: null,
             warnings: [],
             retryCount: 0,
+            isFromCache: false,
         }));
 
         try {
@@ -67,6 +92,7 @@ export function useRecommendations() {
                     errorSource: source,
                     errorDetails: details,
                     retryCount: prev.retryCount + 1,
+                    isFromCache: false,
                 }));
                 return;
             }
@@ -76,8 +102,7 @@ export function useRecommendations() {
             // Check for partial success warnings
             const warnings = data?.metadata?.warnings || [];
 
-            setState((prev) => ({
-                ...prev,
+            setState({
                 status: "success",
                 payload: data,
                 error: null,
@@ -85,28 +110,28 @@ export function useRecommendations() {
                 errorDetails: null,
                 warnings,
                 retryCount: 0,
-            }));
+                isFromCache: false,
+            });
 
-            // Persist to IndexedDB for offline dashboard
+            // Persist to IndexedDB for 1-hour offline cache & offline dashboard
             if (data) {
-                const db = await getDB();
-                await db.put("recommendations", {
-                    id: `${location.city}-${field}-${Date.now()}`,
-                    location,
-                    field,
-                    data: data,
-                    generatedAt: Date.now(),
-                });
+                try {
+                    await saveRecommendationToDB(location, field, data);
+                } catch (saveErr) {
+                    console.warn("[Failed to cache recommendation]", saveErr);
+                }
             }
-        } catch (err: any) {
-            if (err.name === "AbortError") return;
+        } catch (err: unknown) {
+            const errorObj = err as { name?: string; message?: string };
+            if (errorObj?.name === "AbortError") return;
             setState((prev) => ({
                 ...prev,
                 status: "error",
-                error: err.message || "Failed to generate recommendations",
+                error: errorObj?.message || "Failed to generate recommendations",
                 errorSource: "network",
                 errorDetails: null,
                 retryCount: prev.retryCount + 1,
+                isFromCache: false,
             }));
         }
     }, []);

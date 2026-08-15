@@ -47,7 +47,7 @@ export default function Home() {
   const [useGemini, setUseGemini] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const { status, data } = useLocation();
-  const { status: recStatus, payload, error, errorSource, errorDetails, warnings, fetchRecommendations, cancel, reset } = useRecommendations();
+  const { status: recStatus, payload, error, errorSource, errorDetails, warnings, isFromCache, fetchRecommendations, cancel, reset } = useRecommendations();
 
   const handleFieldSelect = (field: string, useGeminiVideos: boolean) => {
     if (data) fetchRecommendations(data, field, useGeminiVideos);
@@ -226,6 +226,7 @@ export default function Home() {
                     field={payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
                     generatedAt={Date.now()}
                     usedGemini={useGemini}
+                    isFromCache={isFromCache}
                   />
                 </div>
               )}
