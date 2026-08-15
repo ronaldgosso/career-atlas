@@ -281,7 +281,6 @@ export default function Home() {
                     region={selectedCachedRecord?.location?.city || data?.city || "your city"}
                     field={selectedCachedRecord?.field || payload.metadata?.region?.split(",")[0].trim() || data?.city || ""}
                     generatedAt={selectedCachedRecord?.generatedAt || Date.now()}
-                    usedGemini={useGemini}
                     isFromCache={isFromCache}
                   />
                 </div>

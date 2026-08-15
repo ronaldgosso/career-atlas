@@ -13,8 +13,6 @@ import {
   Clock, 
   Briefcase, 
   Code2, 
-  BookOpen,
-  CheckCircle2,
   FolderOpen
 } from "lucide-react";
 import { getCachedRecommendations, deleteRecommendation, clearAllRecommendations, exportToJSON } from "@/lib/cache-manager";

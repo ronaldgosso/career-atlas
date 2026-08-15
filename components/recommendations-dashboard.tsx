@@ -13,7 +13,6 @@ import {
     Star,
     Bookmark,
     CheckCircle2,
-    AlertTriangle,
     Rocket,
     ClipboardList,
     ExternalLink,
@@ -42,7 +41,6 @@ interface Props {
     region: string;
     field?: string;
     generatedAt?: number;
-    usedGemini?: boolean;
     isFromCache?: boolean;
 }
 
@@ -52,7 +50,6 @@ export function RecommendationsDashboard({
     region,
     field,
     generatedAt,
-    usedGemini = false,
     isFromCache = false,
 }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>("professional_titles");
