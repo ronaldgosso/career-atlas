@@ -34,10 +34,20 @@ export default function DashboardPage() {
 
   return (
     <section className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Executive Header Banner */}
+      <div className="rounded-3xl border border-teal-500/20 bg-slate-950/80 p-6 backdrop-blur-xl shadow-xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Offline Dashboard</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Review locally cached recommendations. Zero network required.</p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              Talent Dossier Vault
+            </h1>
+            <span className="rounded-full bg-teal-500/10 border border-teal-500/25 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
+              Offline Cache
+            </span>
+          </div>
+          <p className="text-xs text-teal-200/60 mt-1">
+            Review, export, and manage locally cached candidate career intelligence. Zero network required.
+          </p>
         </div>
         <CacheControls records={records} />
       </div>
@@ -47,57 +57,78 @@ export default function DashboardPage() {
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-32 animate-pulse rounded-lg bg-neutral-900" />
+            <div key={i} className="h-32 animate-pulse rounded-2xl bg-slate-900/60 border border-teal-500/10" />
           ))}
         </div>
       ) : records.length === 0 ? (
-        <div className="rounded-lg border border-neutral-800 bg-[var(--bg-surface)] p-8 text-center">
-          <p className="text-lg font-medium text-[var(--text-primary)]">No cached data yet</p>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Generate recommendations on the <Link href="/" className="text-blue-400 hover:underline">home page</Link> to populate your offline library.
+        <div className="rounded-3xl border border-teal-500/20 bg-slate-950/60 p-12 text-center backdrop-blur-md">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-2xl mb-4">
+            📂
+          </div>
+          <p className="text-lg font-bold text-white">No cached dossiers found</p>
+          <p className="mt-1.5 text-xs text-teal-200/60 max-w-md mx-auto">
+            Generate career recommendations on the home page to populate your offline talent intelligence vault.
           </p>
+          <Link
+            href="/"
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-teal-500/20"
+          >
+            Explore Career Fields →
+          </Link>
         </div>
       ) : (
         <div className="space-y-4">
           {records.map(record => (
-            <article key={record.id} className="rounded-lg border border-neutral-800 bg-[var(--bg-surface)] overflow-hidden transition-all">
-              <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <article
+              key={record.id}
+              className="rounded-3xl border border-teal-500/15 bg-slate-950/70 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:border-teal-400/30 hover:shadow-xl hover:shadow-teal-500/5"
+            >
+              <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="font-medium text-[var(--text-primary)]">{record.field}</h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    {record.location?.city || "Unknown Region"} &bull; {new Date(record.generatedAt).toLocaleString()}
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="font-bold text-base text-white">{record.field}</h3>
+                    <span className="rounded-md bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[10px] font-mono text-teal-300">
+                      {record.location?.city || "Unknown Region"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-teal-200/50 mt-1">
+                    Generated: {new Date(record.generatedAt).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <button
                     onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
-                    className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                    className="rounded-xl border border-teal-500/30 bg-teal-950/40 px-3.5 py-1.5 text-xs font-semibold text-teal-300 hover:bg-teal-900/60 hover:text-white transition-all"
                   >
-                    {expandedId === record.id ? "Collapse" : "View Details"}
+                    {expandedId === record.id ? "Hide Details" : "Inspect Dossier"}
                   </button>
                   {expandedId === record.id && record.data && (
                     <button
                       onClick={() => {
                         exportRecommendationToPDF(record.data!, record.location.city, record.field, record.generatedAt);
                       }}
-                      className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
+                      className="rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 hover:brightness-110 transition-all shadow-sm"
                     >
                       Export PDF
                     </button>
                   )}
-                  <button onClick={() => handleDelete(record.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">
+                  <button
+                    onClick={() => handleDelete(record.id)}
+                    className="rounded-xl border border-rose-500/20 bg-rose-950/20 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                  >
                     Delete
                   </button>
                 </div>
               </div>
 
               {expandedId === record.id && activePayload && activeRecord && (
-                <div className="border-t border-neutral-800 bg-[var(--bg-primary)]/40 p-4">
+                <div className="border-t border-teal-500/15 bg-slate-950/90 p-4 sm:p-6">
                   <RecommendationsDashboard
                     payload={activePayload}
                     region={activeRecord.location.city}
                     field={activeRecord.field}
                     generatedAt={activeRecord.generatedAt}
+                    isFromCache={true}
                   />
                 </div>
               )}
@@ -108,3 +139,4 @@ export default function DashboardPage() {
     </section>
   );
 }
+
