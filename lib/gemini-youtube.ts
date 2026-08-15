@@ -13,7 +13,7 @@ export async function searchYouTubeVideos(
   signal?: AbortSignal
 ): Promise<{ title: string; detail: string; url: string; reason: string }[]> {
   if (!isGeminiAvailable()) {
-    throw new Error("GEMINI_API_KEY is not configured");
+    throw new Error("Video search service API key is not configured");
   }
 
   const prompt = `Search YouTube and find 3 currently available video tutorials for a ${field} professional. The person is located in ${region} (consider local relevance if applicable).
@@ -54,7 +54,7 @@ Output ONLY a valid JSON array with no markdown, no explanation:
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "Unknown error");
-    throw new Error(`Gemini API error ${res.status}: ${errText}`);
+    throw new Error(`Video search service error ${res.status}: ${errText}`);
   }
 
   const data = await res.json();
@@ -76,7 +76,7 @@ Output ONLY a valid JSON array with no markdown, no explanation:
       )
       .map((item) => ({
         title: String(item.title || ""),
-        detail: typeof item.detail === "string" ? item.detail : "YouTube",
+        detail: typeof item.detail === "string" ? item.detail : "Video Series",
         url: String(item.url || ""),
         reason: typeof item.reason === "string" ? item.reason : "Verified industry masterclass for this discipline",
       }))

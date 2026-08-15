@@ -18,7 +18,7 @@ const ERROR_CONFIG: Record<string, { Icon: React.ElementType; color: string; bg:
     color: "text-amber-400",
     bg: "bg-amber-950/20",
     borderColor: "border-amber-500/20",
-    title: "Market Intelligence Service Unavailable",
+    title: "AI Model Service Unavailable",
     actionLabel: "Retry Query",
   },
   gemini: {
@@ -26,7 +26,7 @@ const ERROR_CONFIG: Record<string, { Icon: React.ElementType; color: string; bg:
     color: "text-blue-400",
     bg: "bg-blue-950/20",
     borderColor: "border-blue-500/20",
-    title: "Video Sync Service Unavailable",
+    title: "Video Search Service Unavailable",
     actionLabel: "Retry Direct Search",
   },
   validation: {

@@ -503,7 +503,7 @@ export function RecommendationsDashboard({
                                                     </h4>
                                                     {activeTab === "books" && (
                                                         <span className="rounded-md bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 inline-flex items-center gap-1">
-                                                            <CheckCircle2 className="h-3 w-3" /> Google Books Verified
+                                                            <CheckCircle2 className="h-3 w-3" /> Verified Publication
                                                         </span>
                                                     )}
                                                     {activeTab === "videos" && (

@@ -25,11 +25,7 @@ export default function RootLayout({
             <body className="min-h-dvh flex flex-col" suppressHydrationWarning>
                 <main className="flex-1">{children}</main>
                 <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-                    &copy; {new Date().getFullYear()}{' '}
-                    <Link href="https://github.com/ronaldgosso" className="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
-                        Ronald Gosso
-                    </Link>
-                    . Data cached locally.
+                    &copy; {new Date().getFullYear()} Career Atlas. Data cached locally.
                 </footer>
             </body>
         </html>

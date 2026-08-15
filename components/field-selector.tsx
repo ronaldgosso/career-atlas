@@ -137,7 +137,7 @@ export function FieldSelector({
                             </svg>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-xs font-semibold text-teal-100 truncate">Live YouTube Masterclasses</p>
+                            <p className="text-xs font-semibold text-teal-100 truncate">Live Video Masterclasses</p>
                             <p className="text-[10px] text-teal-200/50 truncate">Verified channels & video series</p>
                         </div>
                     </div>

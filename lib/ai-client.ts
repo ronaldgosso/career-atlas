@@ -6,7 +6,7 @@ export async function callMistral(
     signal?: AbortSignal
 ): Promise<ReadableStream<Uint8Array> | null> {
     const apiKey = process.env.MISTRAL_API_KEY || process.env.MISTRAL_APIKEY;
-    if (!apiKey) throw new Error("MISTRAL_API_KEY missing in server env");
+    if (!apiKey) throw new Error("AI API key missing in server environment");
 
     const model = process.env.MISTRAL_MODEL || DEFAULT_MODEL;
 
@@ -43,13 +43,13 @@ export async function callMistral(
                 }
 
                 const status = response.status;
-                const error = new Error(`Mistral API error (${status}): ${parsedMessage}`);
+                const error = new Error(`AI model error (${status}): ${parsedMessage}`);
                 (error as { status?: number }).status = status;
                 throw error;
             }
 
             if (!response.body) {
-                throw new Error("Mistral API returned an empty response body");
+                throw new Error("AI model returned an empty response body");
             }
 
             const bodyReader = response.body.getReader();
@@ -148,6 +148,6 @@ export async function callMistral(
             delay *= 2;
         }
     }
-    throw new Error("Max retries exceeded for Mistral API");
+    throw new Error("Max retries exceeded for AI model service");
 }
 
