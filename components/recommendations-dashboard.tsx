@@ -3,15 +3,30 @@
 import { useState, useMemo } from "react";
 import { type RecommendationPayload } from "@/lib/validators";
 import { exportRecommendationToPDF } from "@/lib/pdf-export";
+import {
+    Briefcase,
+    Code2,
+    BookOpen,
+    Video,
+    GraduationCap,
+    Zap,
+    Star,
+    Bookmark,
+    CheckCircle2,
+    AlertTriangle,
+    Rocket,
+    ClipboardList,
+    ExternalLink,
+} from "lucide-react";
 
 type Tab = "professional_titles" | "projects" | "books" | "videos" | "online_resources";
 
-const TABS: { key: Tab; label: string; icon: string; subtitle: string }[] = [
-    { key: "professional_titles", label: "Market Compensation & Roles", icon: "💼", subtitle: "Salary benchmarks & job levels" },
-    { key: "projects", label: "Capstone Projects", icon: "💻", subtitle: "Recruiter-grade portfolio pieces" },
-    { key: "books", label: "Curated Literature", icon: "📚", subtitle: "Verified books & deep-dive reading" },
-    { key: "videos", label: "Masterclasses & Videos", icon: "🎬", subtitle: "Video tutorials & tech series" },
-    { key: "online_resources", label: "Courses & Certifications", icon: "🎓", subtitle: "Specialized learning paths" },
+const TABS: { key: Tab; label: string; Icon: React.ElementType; subtitle: string }[] = [
+    { key: "professional_titles", label: "Market Compensation & Roles", Icon: Briefcase, subtitle: "Salary benchmarks & job levels" },
+    { key: "projects", label: "Capstone Projects", Icon: Code2, subtitle: "Recruiter-grade portfolio pieces" },
+    { key: "books", label: "Curated Literature", Icon: BookOpen, subtitle: "Verified books & deep-dive reading" },
+    { key: "videos", label: "Masterclasses & Videos", Icon: Video, subtitle: "Video tutorials & tech series" },
+    { key: "online_resources", label: "Courses & Certifications", Icon: GraduationCap, subtitle: "Specialized learning paths" },
 ];
 
 const LEVEL_CONFIG: Record<string, { bg: string; text: string; border: string; barWidth: string }> = {
@@ -72,17 +87,17 @@ export function RecommendationsDashboard({
     // Copy entire Recruiter Brief to clipboard
     const handleCopyDossier = () => {
         const lines: string[] = [
-            `# 📋 CAREER ATLAS RECRUITER DOSSIER`,
+            `# CAREER ATLAS EXECUTIVE DOSSIER`,
             `**Discipline:** ${effectiveField}`,
             `**Target Market:** ${region}`,
             `**Generated:** ${new Date(metadata.generated_at).toLocaleDateString()}`,
-            `\n## 💼 Market Compensation & Target Roles:`,
+            `\n## Market Compensation & Target Roles:`,
             ...professional_titles.map((p) => `- **${p.title}** (${p.level}): ${p.salary_range} — ${p.reason}`),
-            `\n## 💻 Recommended Capstone Projects:`,
+            `\n## Recommended Capstone Projects:`,
             ...projects.map((p) => `- **${p.title}**: ${p.detail} (Why: ${p.reason})`),
-            `\n## 📚 Curated Literature:`,
+            `\n## Curated Literature:`,
             ...books.map((b) => `- **${b.title}** by ${b.detail} (${b.url})`),
-            `\n## 🎓 Courses & Certifications:`,
+            `\n## Courses & Certifications:`,
             ...online_resources.map((c) => `- **${c.title}** (${c.detail})`),
         ];
 
@@ -146,12 +161,12 @@ export function RecommendationsDashboard({
                     <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2.5">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                                Talent Intel Map
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Verified Career Advisory
                             </span>
                             {isFromCache && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 px-2.5 py-1 text-xs font-semibold text-cyan-300">
-                                    ⚡ 1h Cached
+                                    <Zap className="h-3 w-3" /> 1h Cached
                                 </span>
                             )}
                             <span className="rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 text-xs text-teal-300 font-mono">
@@ -177,14 +192,14 @@ export function RecommendationsDashboard({
                                     <svg className="h-4 w-4 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
-                                    <span>Copied Dossier!</span>
+                                    <span>Copied Brief!</span>
                                 </>
                             ) : (
                                 <>
                                     <svg className="h-4 w-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                     </svg>
-                                    <span>Copy Recruiter Brief</span>
+                                    <span>Copy Executive Brief</span>
                                 </>
                             )}
                         </button>
@@ -265,7 +280,7 @@ export function RecommendationsDashboard({
                                         : "border border-transparent text-teal-200/60 hover:text-white hover:bg-slate-900/60"
                                 }`}
                             >
-                                <span className="text-xl">{tab.icon}</span>
+                                <tab.Icon className={`h-4 w-4 ${isActive ? "text-teal-300" : "text-teal-400/60"}`} />
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-bold tracking-wide">{tab.label}</span>
@@ -363,10 +378,10 @@ export function RecommendationsDashboard({
                                             </div>
                                             <button
                                                 onClick={() => toggleBookmark(`title-${index}`)}
-                                                className={`text-lg transition-transform active:scale-125 ${isBookmarked ? "text-amber-400 scale-110" : "text-neutral-600 hover:text-amber-300"}`}
+                                                className={`transition-transform active:scale-125 ${isBookmarked ? "text-amber-400 scale-110" : "text-neutral-600 hover:text-amber-300"}`}
                                                 title="Save to Shortlist"
                                             >
-                                                ★
+                                                <Star className={`h-5 w-5 ${isBookmarked ? "fill-amber-400" : ""}`} />
                                             </button>
                                         </div>
 
@@ -411,14 +426,15 @@ export function RecommendationsDashboard({
                                     <div className="relative space-y-4">
                                         <div className="flex items-start justify-between gap-3">
                                             <span className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/25 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300 uppercase tracking-wider">
-                                                <span>🚀 Capstone #{index + 1}</span>
+                                                <Rocket className="h-3 w-3" />
+                                                <span>Capstone #{index + 1}</span>
                                             </span>
                                             <button
                                                 onClick={() => toggleBookmark(`proj-${index}`)}
-                                                className={`text-lg transition-transform active:scale-125 ${isBookmarked ? "text-amber-400 scale-110" : "text-neutral-600 hover:text-amber-300"}`}
+                                                className={`transition-transform active:scale-125 ${isBookmarked ? "text-amber-400 scale-110" : "text-neutral-600 hover:text-amber-300"}`}
                                                 title="Save to Shortlist"
                                             >
-                                                ★
+                                                <Star className={`h-5 w-5 ${isBookmarked ? "fill-amber-400" : ""}`} />
                                             </button>
                                         </div>
 
@@ -441,7 +457,11 @@ export function RecommendationsDashboard({
                                             onClick={() => handleCopyResumeBullet(item, index)}
                                             className="inline-flex items-center gap-1.5 rounded-lg border border-teal-500/20 bg-teal-950/40 px-3 py-1.5 text-[11px] font-semibold text-teal-300 transition-all hover:bg-teal-900/50 hover:text-white"
                                         >
-                                            {isCopied ? "✓ Bullet Copied!" : "📋 Copy Resume Impact"}
+                                            {isCopied ? (
+                                                <><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Bullet Copied!</>
+                                            ) : (
+                                                <><ClipboardList className="h-3.5 w-3.5" /> Copy Resume Impact</>
+                                            )}
                                         </button>
                                         {item.url && (
                                             <a
@@ -482,13 +502,13 @@ export function RecommendationsDashboard({
                                                         {item.title}
                                                     </h4>
                                                     {activeTab === "books" && (
-                                                        <span className="rounded-md bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
-                                                            ✓ Google Books Verified
+                                                        <span className="rounded-md bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 inline-flex items-center gap-1">
+                                                            <CheckCircle2 className="h-3 w-3" /> Google Books Verified
                                                         </span>
                                                     )}
-                                                    {activeTab === "videos" && usedGemini && (
-                                                        <span className="rounded-md bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 text-[10px] font-semibold text-blue-300">
-                                                            ✨ Gemini Verified YouTube
+                                                    {activeTab === "videos" && (
+                                                        <span className="rounded-md bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 text-[10px] font-semibold text-blue-300 inline-flex items-center gap-1">
+                                                            <Video className="h-3 w-3" /> Verified Masterclass
                                                         </span>
                                                     )}
                                                 </div>
@@ -508,10 +528,10 @@ export function RecommendationsDashboard({
                                         <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
                                             <button
                                                 onClick={() => toggleBookmark(`${activeTab}-${index}`)}
-                                                className={`text-base p-1 transition-transform active:scale-125 ${isBookmarked ? "text-amber-400" : "text-neutral-600 hover:text-amber-300"}`}
+                                                className={`p-1 transition-transform active:scale-125 ${isBookmarked ? "text-amber-400" : "text-neutral-600 hover:text-amber-300"}`}
                                                 title="Bookmark Item"
                                             >
-                                                ★
+                                                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-amber-400" : ""}`} />
                                             </button>
                                             {item.url && (
                                                 <a
@@ -521,9 +541,7 @@ export function RecommendationsDashboard({
                                                     className="inline-flex items-center gap-1.5 rounded-xl bg-teal-500/10 border border-teal-500/25 px-3.5 py-1.5 text-xs font-semibold text-teal-300 transition-all hover:bg-teal-500 hover:text-slate-950"
                                                 >
                                                     <span>Open Resource</span>
-                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                    </svg>
+                                                    <ExternalLink className="h-3.5 w-3.5" />
                                                 </a>
                                             )}
                                         </div>

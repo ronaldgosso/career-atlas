@@ -127,7 +127,7 @@ export function useRecommendations() {
             setState((prev) => ({
                 ...prev,
                 status: "error",
-                error: errorObj?.message || "Failed to generate recommendations",
+                error: errorObj?.message || "Unable to compile career recommendations at this time",
                 errorSource: "network",
                 errorDetails: null,
                 retryCount: prev.retryCount + 1,

@@ -30,9 +30,6 @@ export default function RootLayout({
                             <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors">
                                 career@las
                             </Link>
-                            <Link href="/dashboard" className="text-sm text-[var(--text-muted)] hover:text-white transition-colors">
-                                Dashboard
-                            </Link>
                         </div>
                         <LocationSwitcher />
                     </div>

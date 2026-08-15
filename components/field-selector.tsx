@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { Monitor, Building2, HeartPulse, Wrench, HardHat } from "lucide-react";
 
 interface FieldMetadata {
     name: string;
@@ -9,14 +10,14 @@ interface FieldMetadata {
     salaryPreview?: string;
 }
 
-const CATEGORIES: { label: string; emoji: string; fields: FieldMetadata[] }[] = [
+const CATEGORIES: { label: string; Icon: React.ElementType; fields: FieldMetadata[] }[] = [
     {
-        label: "Technology & AI",
-        emoji: "💻",
+        label: "Technology & Software Systems",
+        Icon: Monitor,
         fields: [
-            { name: "Software Engineering", tag: "Most In-Demand", demand: "High" },
+            { name: "Software Engineering", tag: "Core Engineering", demand: "High" },
             { name: "Cloud & DevOps", tag: "Infrastructure", demand: "Surging" },
-            { name: "Machine Learning Engineering", tag: "AI / GenAI", demand: "Top Compensation" },
+            { name: "Machine Learning Engineering", tag: "Data & Systems", demand: "Top Compensation" },
             { name: "Data Science & Analytics", tag: "Analytics", demand: "High" },
             { name: "Cybersecurity", tag: "SecOps", demand: "Surging" },
             { name: "UI/UX Design", tag: "Product Design", demand: "High" },
@@ -28,7 +29,7 @@ const CATEGORIES: { label: string; emoji: string; fields: FieldMetadata[] }[] = 
     },
     {
         label: "Executive & Professional Services",
-        emoji: "🏛️",
+        Icon: Building2,
         fields: [
             { name: "Finance & Accounting", tag: "Fintech & Audit", demand: "Top Compensation" },
             { name: "Law & Legal Tech", tag: "Compliance & Tech", demand: "High" },
@@ -36,7 +37,7 @@ const CATEGORIES: { label: string; emoji: string; fields: FieldMetadata[] }[] = 
     },
     {
         label: "Healthcare & Life Sciences",
-        emoji: "🩺",
+        Icon: HeartPulse,
         fields: [
             { name: "Healthcare & MedTech", tag: "Clinical & Digital", demand: "Surging" },
             { name: "Education & EdTech", tag: "Learning Systems", demand: "Core" },
@@ -44,14 +45,14 @@ const CATEGORIES: { label: string; emoji: string; fields: FieldMetadata[] }[] = 
     },
     {
         label: "Engineering & Advanced Systems",
-        emoji: "⚙️",
+        Icon: Wrench,
         fields: [
             { name: "Engineering & Manufacturing", tag: "Robotics & Hardware", demand: "High" },
         ],
     },
     {
         label: "Infrastructure & Built Environment",
-        emoji: "🏗️",
+        Icon: HardHat,
         fields: [
             { name: "Construction & Real Estate", tag: "PropTech & Projects", demand: "Core" },
         ],
@@ -100,7 +101,7 @@ export function FieldSelector({
 
     return (
         <div className="space-y-6">
-            {/* Top Toolbar: Search & Gemini Grounding */}
+            {/* Top Toolbar: Search & Live Video Grounding */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                 {/* Instant Search Bar */}
                 <div className="md:col-span-7 relative">
@@ -113,7 +114,7 @@ export function FieldSelector({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search career fields, tech, roles (e.g., DevOps, AI, Product)..."
+                        placeholder="Search career fields, tech, roles (e.g., DevOps, Cloud, Product)..."
                         disabled={disabled}
                         className="w-full pl-10 pr-10 py-3 rounded-xl border border-teal-500/20 bg-slate-900/60 text-sm text-teal-100 placeholder-teal-300/40 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-400 backdrop-blur-md transition-all shadow-inner"
                     />
@@ -127,7 +128,7 @@ export function FieldSelector({
                     )}
                 </div>
 
-                {/* Gemini Video Search Toggle */}
+                {/* Live Video Search Sync Toggle */}
                 <div className="md:col-span-5 rounded-xl border border-teal-500/20 bg-slate-900/60 p-3 backdrop-blur-md flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5 min-w-0">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30">
@@ -136,8 +137,8 @@ export function FieldSelector({
                             </svg>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-xs font-semibold text-teal-100 truncate">Gemini Real Video Search</p>
-                            <p className="text-[10px] text-teal-200/50 truncate">Verified YouTube channels</p>
+                            <p className="text-xs font-semibold text-teal-100 truncate">Live YouTube Masterclasses</p>
+                            <p className="text-[10px] text-teal-200/50 truncate">Verified channels & video series</p>
                         </div>
                     </div>
                     <button
@@ -161,15 +162,15 @@ export function FieldSelector({
             <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-teal-200/60 px-1">
                 <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-emerald-400 font-medium text-[11px]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Live Recruiter Intelligence
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        Verified Market Intelligence
                     </span>
                     <span>•</span>
                     <span>18 Standardized Global Career Disciplines</span>
                 </div>
                 {searchQuery && (
                     <span className="text-teal-300 font-medium">
-                        Showing {totalMatchingFields} matching fields
+                        Showing {totalMatchingFields} matching disciplines
                     </span>
                 )}
             </div>
@@ -178,7 +179,7 @@ export function FieldSelector({
             {filteredCategories.length === 0 ? (
                 <div className="rounded-2xl border border-teal-500/10 bg-slate-900/40 p-8 text-center backdrop-blur-md">
                     <p className="text-base font-medium text-teal-100">No career fields match &ldquo;{searchQuery}&rdquo;</p>
-                    <p className="text-xs text-teal-200/50 mt-1">Try searching for Software, Cloud, Finance, AI, or Design</p>
+                    <p className="text-xs text-teal-200/50 mt-1">Try searching for Software, Cloud, Finance, Data, or Design</p>
                     <button
                         onClick={() => setSearchQuery("")}
                         className="mt-3 text-xs text-teal-300 hover:text-teal-100 underline underline-offset-4"
@@ -190,7 +191,7 @@ export function FieldSelector({
                 filteredCategories.map((category) => (
                     <div key={category.label} className="space-y-3">
                         <div className="flex items-center gap-2.5">
-                            <span className="text-base">{category.emoji}</span>
+                            <category.Icon className="h-4 w-4 text-teal-300/70" />
                             <h2 className="text-xs font-bold text-teal-200/80 uppercase tracking-widest">
                                 {category.label}
                             </h2>
@@ -257,4 +258,5 @@ export function FieldSelector({
         </div>
     );
 }
+
 

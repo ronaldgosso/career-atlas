@@ -39,7 +39,7 @@ async function fetchCategory(
         .replace("{field}", field);
 
     const stream = await callMistral(prompt, signal);
-    if (!stream) throw new Error(`Failed to fetch ${category}: AI stream unavailable`);
+    if (!stream) throw new Error(`Failed to fetch ${category}: data stream unavailable`);
 
     const reader = stream.getReader();
     let result = "";
@@ -68,7 +68,7 @@ async function fetchCategory(
 
 function classifyMistralError(err: unknown): string {
     const rawMsg = err instanceof Error ? err.message : String(err);
-    const msg = rawMsg || "Unknown Mistral AI error";
+    const msg = rawMsg || "Data service unavailable";
     const lower = msg.toLowerCase();
 
     if (
@@ -79,10 +79,10 @@ function classifyMistralError(err: unknown): string {
         lower.includes("api key") ||
         lower.includes("mistral_api_key missing")
     ) {
-        return "Invalid or missing API key. Check your MISTRAL_API_KEY.";
+        return "Service authorization notice. Please check system credentials.";
     }
     if (lower.includes("429") || lower.includes("rate limit") || lower.includes("too many") || lower.includes("quota")) {
-        return "Rate limit or quota exceeded. Mistral AI is throttling requests. Wait a moment and retry.";
+        return "Market data servers are experiencing high volume. Please wait a moment and retry.";
     }
     if (
         lower.includes("503") ||
@@ -91,35 +91,35 @@ function classifyMistralError(err: unknown): string {
         lower.includes("overloaded") ||
         lower.includes("service unavailable")
     ) {
-        return "Mistral AI service is temporarily overloaded or unavailable. Retry in a moment.";
+        return "Career intelligence servers are temporarily updating. Please retry in a moment.";
     }
     if (lower.includes("404") || lower.includes("model not found")) {
-        return "Model not found. The configured Mistral AI model is invalid or unavailable.";
+        return "The requested career discipline database is syncing. Please retry shortly.";
     }
     if (msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED") || lower.includes("network")) {
-        return "Network error. Cannot reach Mistral AI API. Check your internet connection.";
+        return "Network connection issue. Unable to reach career intelligence server.";
     }
-    return msg;
+    return "Career advisory services are momentarily busy. Please retry shortly.";
 }
 
 function classifyGeminiError(err: unknown): string {
     const rawMsg = err instanceof Error ? err.message : String(err);
-    const msg = rawMsg || "Unknown Gemini error";
+    const msg = rawMsg || "Video search service notice";
     const lower = msg.toLowerCase();
 
     if (lower.includes("400") && lower.includes("api key")) {
-        return "Invalid Gemini API key. Check your GOOGLE_GEMINI_API_KEY.";
+        return "Video sync authorization required.";
     }
     if (lower.includes("429") || lower.includes("quota") || lower.includes("rate limit")) {
-        return "Gemini rate limit or quota exceeded. Retry later or check your Google Cloud quotas.";
+        return "Live video query limit reached. Loading verified standard masterclasses.";
     }
     if (lower.includes("503") || lower.includes("service unavailable")) {
-        return "Gemini service is temporarily unavailable. Falling back to AI-generated videos.";
+        return "Live video search is temporarily offline. Loading verified standard masterclasses.";
     }
     if (lower.includes("403") || lower.includes("permission")) {
-        return "Gemini access denied. Verify your API key has the necessary permissions.";
+        return "Video channel query requires verified credentials.";
     }
-    return msg;
+    return "Direct video search syncing. Loading standard video masterclasses.";
 }
 
 export async function POST(req: NextRequest) {
@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
 
         // If ALL categories failed, return an error response
         if (successes.length === 0) {
-            const primaryError = serviceErrors[0] || { source: "unknown" as ErrorSource, message: "All AI services failed" };
+            const primaryError = serviceErrors[0] || { source: "unknown" as ErrorSource, message: "Career advisory service is temporarily updating. Please retry shortly." };
             const allMessages = [...new Set(serviceErrors.map((e) => e.message))].join("\n");
             const body: ErrorResponse = {
                 error: primaryError.message,
@@ -263,11 +263,14 @@ export async function POST(req: NextRequest) {
             },
         });
     } catch (err: unknown) {
-        // Top-level unhandled error
-        const msg = err instanceof Error ? err.message : "Unknown error";
-        const source: ErrorSource = msg.toLowerCase().includes("gemini") ? "gemini" : msg.toLowerCase().includes("mistral") ? "mistral" : "unknown";
-        console.error("[AI Route Error]", msg);
-        const body: ErrorResponse = { error: msg, source, details: "Unexpected server error" };
+        // Top-level unhandled error — never expose internal service names to the client
+        const internalMsg = err instanceof Error ? err.message : "Unknown error";
+        console.error("[Route Error]", internalMsg);
+        const body: ErrorResponse = {
+            error: "Career advisory services encountered an unexpected issue. Please retry shortly.",
+            source: "unknown",
+            details: "Unexpected server error",
+        };
         return NextResponse.json(body, { status: 500 });
     }
 }

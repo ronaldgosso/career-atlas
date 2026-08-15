@@ -7,38 +7,39 @@ import { useRecommendations } from "@/hooks/use-recommendations";
 import { FieldSelector } from "@/components/field-selector";
 import { RecommendationsDashboard } from "@/components/recommendations-dashboard";
 import { LoadingOrb } from "@/components/loading-orb";
+import { Compass, Clapperboard, AlertTriangle, Globe } from "lucide-react";
 
-const ERROR_CONFIG: Record<string, { icon: string; color: string; bg: string; borderColor: string; title: string; actionLabel: string }> = {
+const ERROR_CONFIG: Record<string, { Icon: React.ElementType; color: string; bg: string; borderColor: string; title: string; actionLabel: string }> = {
   mistral: {
-    icon: "🌪️",
+    Icon: Compass,
     color: "text-amber-400",
     bg: "bg-amber-950/20",
     borderColor: "border-amber-500/20",
-    title: "AI Model Error",
-    actionLabel: "Retry",
+    title: "Market Intelligence Service Unavailable",
+    actionLabel: "Retry Query",
   },
   gemini: {
-    icon: "✨",
+    Icon: Clapperboard,
     color: "text-blue-400",
     bg: "bg-blue-950/20",
     borderColor: "border-blue-500/20",
-    title: "Gemini Video Search Failed",
-    actionLabel: "Retry without Gemini",
+    title: "Video Sync Service Unavailable",
+    actionLabel: "Retry Direct Search",
   },
   validation: {
-    icon: "⚠️",
+    Icon: AlertTriangle,
     color: "text-orange-400",
     bg: "bg-orange-950/20",
     borderColor: "border-orange-500/20",
-    title: "Validation Error",
+    title: "Data Verification Notice",
     actionLabel: "Retry",
   },
   network: {
-    icon: "🌐",
+    Icon: Globe,
     color: "text-red-400",
     bg: "bg-red-950/20",
     borderColor: "border-red-500/20",
-    title: "Network Error",
+    title: "Network Connection Error",
     actionLabel: "Retry",
   },
 };
@@ -88,7 +89,7 @@ export default function Home() {
                     Career Atlas
                   </h1>
                   <span className="rounded-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
-                    AI Recruiter Intel
+                    Executive Talent Advisory
                   </span>
                 </div>
                 <p className="text-xs text-teal-200/60 mt-0.5">
@@ -100,7 +101,7 @@ export default function Home() {
             {/* Quick Status Pill */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900/80 border border-teal-500/20 px-3 py-1.5 text-xs text-teal-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 {data ? `${data.city}, ${data.countryCode}` : "Detecting Location..."}
               </span>
             </div>
@@ -141,17 +142,17 @@ export default function Home() {
                     <LoadingOrb />
                     <div className="space-y-2.5 text-center">
                       <p className="text-xl font-extrabold text-white animate-pulse">
-                        Synthesizing Executive Career Dossier...
+                        Compiling Career Intelligence Dossier...
                       </p>
                       <p className="text-sm text-teal-200/70">
-                        Analyzing live compensation benchmarks & competency roadmaps for {data?.city || "your market"}
+                        Cross-referencing verified market compensation & competency standards for {data?.city || "your market"}
                       </p>
                       <div className="flex items-center justify-center gap-2.5 text-xs text-teal-300/60 pt-1">
                         <span className="rounded-full bg-teal-500/10 border border-teal-500/20 px-3 py-1 font-mono text-[11px] text-teal-300">
-                          Mistral AI Neural Engine
+                          Industry Advisory Engine
                         </span>
                         <span>•</span>
-                        <span>Multi-category Parallel Synthesis</span>
+                        <span>Multi-category Benchmark Synthesis</span>
                       </div>
                     </div>
                     {/* Wave progress indicator */}
@@ -182,8 +183,8 @@ export default function Home() {
                   <div className="animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className={`rounded-xl border ${cfg.borderColor} ${cfg.bg} p-6 backdrop-blur-sm`}>
                       <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 text-2xl">
-                          {cfg.icon}
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/5 ${cfg.color}`}>
+                          <cfg.Icon className="h-6 w-6" />
                         </div>
                         <div className="flex-1 space-y-3">
                           <div>
@@ -195,21 +196,11 @@ export default function Home() {
                           </div>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleFieldSelect("IT", retryGeminiOff ? false : useGemini)}
+                              onClick={() => handleFieldSelect("Information Technology (IT)", retryGeminiOff ? false : useGemini)}
                               className={`rounded-lg px-4 py-2 text-sm font-medium transition ${cfg.bg.replace("/20", "/30")} ${cfg.color.replace("text-", "text-")} border ${cfg.borderColor} hover:brightness-125`}
                             >
-                              {cfg.actionLabel} {retryGeminiOff && <span className="text-xs opacity-60">(Mistral fallback)</span>}
+                              {cfg.actionLabel}
                             </button>
-                            {errorSource === "mistral" && (
-                              <a
-                                href="https://console.mistral.ai/api-keys/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-neutral-400 hover:text-neutral-300 underline underline-offset-2"
-                              >
-                                Check API key
-                              </a>
-                            )}
                           </div>
                         </div>
                       </div>

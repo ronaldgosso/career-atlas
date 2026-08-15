@@ -8,6 +8,7 @@ import { RecommendationsDashboard } from "@/components/recommendations-dashboard
 import { CacheControls } from "@/components/cache-controls";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { exportRecommendationToPDF } from "@/lib/pdf-export";
+import { FolderOpen } from "lucide-react";
 
 export default function DashboardPage() {
   const [records, setRecords] = useState<RecommendationRecord[]>([]);
@@ -62,8 +63,8 @@ export default function DashboardPage() {
         </div>
       ) : records.length === 0 ? (
         <div className="rounded-3xl border border-teal-500/20 bg-slate-950/60 p-12 text-center backdrop-blur-md">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-2xl mb-4">
-            📂
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 mb-4">
+            <FolderOpen className="h-7 w-7" />
           </div>
           <p className="text-lg font-bold text-white">No cached dossiers found</p>
           <p className="mt-1.5 text-xs text-teal-200/60 max-w-md mx-auto">

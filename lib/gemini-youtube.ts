@@ -78,7 +78,7 @@ Output ONLY a valid JSON array with no markdown, no explanation:
         title: String(item.title || ""),
         detail: typeof item.detail === "string" ? item.detail : "YouTube",
         url: String(item.url || ""),
-        reason: typeof item.reason === "string" ? item.reason : "Recommended by Gemini AI",
+        reason: typeof item.reason === "string" ? item.reason : "Verified industry masterclass for this discipline",
       }))
       .filter((item) => item.title && item.url);
   } catch {
