@@ -100,7 +100,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 md:p-6">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"
@@ -109,24 +109,24 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
       />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-3xl border border-teal-500/30 bg-slate-950 shadow-2xl shadow-teal-500/10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[92vh] sm:max-h-[85vh] overflow-hidden rounded-3xl border border-teal-500/30 bg-slate-950 shadow-2xl shadow-teal-500/10 animate-in fade-in zoom-in-95 duration-200">
         {/* Modal Header */}
-        <div className="flex flex-col gap-4 border-b border-teal-500/20 bg-slate-900/80 px-6 py-5">
+        <div className="flex flex-col gap-3.5 sm:gap-4 border-b border-teal-500/20 bg-slate-900/80 px-4 py-4 sm:px-6 sm:py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-300">
-                <Database className="h-5 w-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-300">
+                <Database className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold tracking-tight text-white">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <h2 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
                     Cached Dossiers Vault
                   </h2>
-                  <span className="rounded-full bg-teal-500/10 border border-teal-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
+                  <span className="rounded-full bg-teal-500/10 border border-teal-500/30 px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold text-teal-300 whitespace-nowrap">
                     {records.length} {records.length === 1 ? "Record" : "Records"}
                   </span>
                 </div>
-                <p className="text-xs text-teal-200/60 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-teal-200/60 mt-0.5 truncate sm:whitespace-normal">
                   Locally stored career intelligence. Ready for instant offline retrieval.
                 </p>
               </div>
@@ -134,7 +134,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
 
             <button
               onClick={onClose}
-              className="rounded-xl border border-neutral-700/50 bg-slate-900/80 p-2 text-neutral-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="rounded-xl border border-neutral-700/50 bg-slate-900/80 p-2 text-neutral-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0 ml-2"
               aria-label="Close modal"
             >
               <X className="h-4 w-4" />
@@ -142,20 +142,20 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
           </div>
 
           {/* Search & Actions Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-teal-400/50 pointer-events-none" />
+          <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 pt-1">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-teal-400/50 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter by field or city..."
-                className="w-full pl-9 pr-8 py-2 rounded-xl border border-teal-500/20 bg-slate-950/80 text-xs text-teal-100 placeholder-teal-300/40 focus:outline-none focus:ring-1 focus:ring-teal-400"
+                className="w-full pl-8 sm:pl-9 pr-8 py-2 rounded-xl border border-teal-500/20 bg-slate-950/80 text-xs text-teal-100 placeholder-teal-300/40 focus:outline-none focus:ring-1 focus:ring-teal-400"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-2 text-xs text-teal-400 hover:text-white"
+                  className="absolute right-2.5 top-2 text-xs text-teal-400 hover:text-white cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -163,10 +163,10 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
             </div>
 
             {records.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={handleExportJSON}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/20 bg-teal-950/40 px-3 py-2 text-xs font-semibold text-teal-300 hover:bg-teal-900/60 hover:text-white transition-all"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-teal-500/20 bg-teal-950/40 px-3 py-2 text-xs font-semibold text-teal-300 hover:bg-teal-900/60 hover:text-white transition-all cursor-pointer"
                   title="Export all records as JSON"
                 >
                   <Download className="h-3.5 w-3.5" />
@@ -177,13 +177,13 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                   <div className="flex items-center gap-1.5 text-xs">
                     <button
                       onClick={handleClearAll}
-                      className="rounded-xl bg-rose-600 px-3 py-2 text-xs font-bold text-white hover:bg-rose-500 transition-colors"
+                      className="rounded-xl bg-rose-600 px-3 py-2 text-xs font-bold text-white hover:bg-rose-500 transition-colors cursor-pointer"
                     >
                       Confirm Clear
                     </button>
                     <button
                       onClick={() => setConfirmClear(false)}
-                      className="rounded-xl border border-neutral-700 bg-slate-900 px-2.5 py-2 text-xs text-neutral-300 hover:text-white"
+                      className="rounded-xl border border-neutral-700 bg-slate-900 px-2.5 py-2 text-xs text-neutral-300 hover:text-white cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -191,7 +191,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                 ) : (
                   <button
                     onClick={() => setConfirmClear(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-900/40 hover:text-rose-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-900/40 hover:text-rose-300 transition-colors cursor-pointer"
                     title="Clear all stored recommendations"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -204,7 +204,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
         </div>
 
         {/* Modal Body / Records List */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3">
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -212,11 +212,11 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
               ))}
             </div>
           ) : records.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 mb-4">
-                <FolderOpen className="h-7 w-7" />
+            <div className="flex flex-col items-center justify-center py-10 sm:py-12 px-4 text-center">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 mb-4">
+                <FolderOpen className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-base font-bold text-white">No cached dossiers yet</h3>
+              <h3 className="text-sm sm:text-base font-bold text-white">No cached dossiers yet</h3>
               <p className="mt-1 text-xs text-teal-200/60 max-w-sm">
                 Select any career field on the home page to automatically cache calibrated compensation, capstone projects, and curricula.
               </p>
@@ -243,11 +243,11 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                     onSelectRecord(record);
                     onClose();
                   }}
-                  className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-teal-500/15 bg-slate-900/60 p-4 transition-all duration-200 hover:border-teal-400/40 hover:bg-slate-900/90 hover:shadow-lg hover:shadow-teal-500/5 cursor-pointer"
+                  className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-2xl border border-teal-500/15 bg-slate-900/60 p-3.5 sm:p-4 transition-all duration-200 hover:border-teal-400/40 hover:bg-slate-900/90 hover:shadow-lg hover:shadow-teal-500/5 cursor-pointer"
                 >
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors">
+                      <h4 className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors truncate">
                         {record.field}
                       </h4>
                       <span className="inline-flex items-center gap-1 rounded-md bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[10px] font-mono text-teal-300">
@@ -256,7 +256,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-teal-200/60">
+                    <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-teal-200/60">
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3 w-3 text-teal-400/60" />
                         {dateStr}
@@ -275,7 +275,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-teal-500/10">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -289,7 +289,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                           );
                         }
                       }}
-                      className="inline-flex items-center gap-1 rounded-xl border border-teal-500/20 bg-teal-950/40 px-2.5 py-1.5 text-xs font-semibold text-teal-300 hover:bg-teal-900/60 hover:text-white transition-colors"
+                      className="inline-flex items-center gap-1 rounded-xl border border-teal-500/20 bg-teal-950/40 px-2.5 py-1.5 text-xs font-semibold text-teal-300 hover:bg-teal-900/60 hover:text-white transition-colors cursor-pointer"
                       title="Export as PDF"
                     >
                       <FileDown className="h-3.5 w-3.5" />
@@ -299,7 +299,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
                     <button
                       type="button"
                       onClick={(e) => handleDelete(e, record.id)}
-                      className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-1.5 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors"
+                      className="rounded-xl border border-rose-500/20 bg-rose-950/20 p-1.5 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-colors cursor-pointer"
                       title="Delete from cache"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -317,7 +317,7 @@ export function CachedResultsModal({ isOpen, onClose, onSelectRecord, onCacheUpd
         </div>
 
         {/* Modal Footer */}
-        <div className="border-t border-teal-500/15 bg-slate-900/60 px-6 py-3 flex items-center justify-between text-xs text-teal-200/50">
+        <div className="border-t border-teal-500/15 bg-slate-900/60 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between text-[11px] sm:text-xs text-teal-200/50">
           <span>Click any cached dossier to view immediately</span>
           <span>IndexedDB Storage</span>
         </div>

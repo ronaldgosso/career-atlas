@@ -99,41 +99,41 @@ export default function Home() {
   }, [isLoading]);
 
   return (
-    <section className="relative mx-auto min-h-screen max-w-5xl px-4 py-8">
+    <section className="relative mx-auto min-h-screen max-w-5xl px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Animated background - Deep ocean obsidian theme */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-[#07131e] to-slate-950">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.12),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(16,185,129,0.08),transparent_50%)]" />
       </div>
 
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
         {/* Executive Header Banner */}
-        <header className="relative z-30 rounded-3xl border border-teal-500/20 bg-slate-950/70 p-6 backdrop-blur-xl shadow-xl transition-all">
+        <header className="relative z-30 rounded-3xl border border-teal-500/20 bg-slate-950/70 p-4 sm:p-6 backdrop-blur-xl shadow-xl transition-all">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 shadow-lg shadow-teal-500/25">
-                <svg className="h-6 w-6 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 shadow-lg shadow-teal-500/25">
+                <svg className="h-5 w-5 sm:h-6 sm:w-6 text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
                 </svg>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-white truncate">
                     Career Atlas
                   </h1>
-                  <span className="rounded-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-teal-300">
+                  <span className="rounded-full bg-gradient-to-r from-teal-500/20 to-cyan-500/20 border border-teal-500/30 px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold text-teal-300 whitespace-nowrap">
                     Executive Talent Advisory
                   </span>
                 </div>
-                <p className="text-xs text-teal-200/60 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-teal-200/60 mt-0.5 truncate sm:whitespace-normal">
                   Market-calibrated hiring benchmarks, capstones, & competencies
                 </p>
               </div>
             </div>
 
             {/* Quick Status & Cache Action */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setIsCacheOpen(true)}
