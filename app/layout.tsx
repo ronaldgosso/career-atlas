@@ -61,8 +61,20 @@ export default function RootLayout({
                 <ServiceWorkerRegister />
                 <HorizontalScrollProvider>
                     <main className="flex-1">{children}</main>
-                    <footer className="border-t border-teal-500/10 bg-slate-950/80 px-4 py-4 text-center text-xs text-teal-200/50 backdrop-blur-md">
-                        &copy; {new Date().getFullYear()} Career Atlas. Market-calibrated intelligence cached locally.
+                    <footer className="border-t border-teal-500/10 bg-slate-950/80 px-4 py-4 text-center text-xs text-teal-200/50 backdrop-blur-md flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+                        <span>&copy; {new Date().getFullYear()} Career Atlas. Market-calibrated intelligence cached locally.</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>
+                            Crafted by{" "}
+                            <a
+                                href="https://github.com/ronaldgosso"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-semibold text-teal-300 hover:text-cyan-200 underline underline-offset-4 transition-colors"
+                            >
+                                Ronald Gosso
+                            </a>
+                        </span>
                     </footer>
                 </HorizontalScrollProvider>
             </body>
