@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./global.css";
+import { HorizontalScrollProvider } from "@/components/horizontal-scroll-provider";
 
 export const metadata: Metadata = {
     title: "career@las",
@@ -22,10 +23,12 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body className="min-h-dvh flex flex-col" suppressHydrationWarning>
-                <main className="flex-1">{children}</main>
-                <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
-                    &copy; {new Date().getFullYear()} Career Atlas. Data cached locally.
-                </footer>
+                <HorizontalScrollProvider>
+                    <main className="flex-1">{children}</main>
+                    <footer className="border-t border-neutral-800 px-4 py-4 text-center text-xs text-[var(--text-muted)]">
+                        &copy; {new Date().getFullYear()} Career Atlas. Data cached locally.
+                    </footer>
+                </HorizontalScrollProvider>
             </body>
         </html>
     );

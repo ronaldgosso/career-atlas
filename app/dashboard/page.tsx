@@ -37,7 +37,7 @@ export default function DashboardPage() {
   return (
     <section className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
       {/* Executive Header Banner */}
-      <div className="rounded-3xl border border-teal-500/20 bg-slate-950/80 p-6 backdrop-blur-xl shadow-xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative z-30 rounded-3xl border border-teal-500/20 bg-slate-950/80 p-6 backdrop-blur-xl shadow-xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <Link

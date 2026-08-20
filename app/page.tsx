@@ -108,7 +108,7 @@ export default function Home() {
 
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Executive Header Banner */}
-        <header className="rounded-3xl border border-teal-500/20 bg-slate-950/70 p-6 backdrop-blur-xl shadow-xl transition-all">
+        <header className="relative z-30 rounded-3xl border border-teal-500/20 bg-slate-950/70 p-6 backdrop-blur-xl shadow-xl transition-all">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 shadow-lg shadow-teal-500/25">
