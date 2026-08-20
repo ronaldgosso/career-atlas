@@ -256,7 +256,7 @@ export function RecommendationsDashboard({
 
             {/* ── Executive Tab Navigation Bar ── */}
             <div className="border-b border-teal-500/10 bg-slate-950/90 px-4 py-3 sm:px-6">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                <div className="flex gap-2 overflow-x-auto horizontal-scroll no-scrollbar py-1 cursor-grab active:cursor-grabbing">
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.key;
                         const count =
@@ -271,7 +271,7 @@ export function RecommendationsDashboard({
                                     setActiveTab(tab.key);
                                     setTabFilterQuery("");
                                 }}
-                                className={`group relative flex items-center gap-2.5 rounded-2xl px-4 py-3 text-left transition-all duration-200 whitespace-nowrap focus:outline-none ${
+                                className={`group relative flex items-center gap-2.5 rounded-2xl px-4 py-3 text-left transition-all duration-200 whitespace-nowrap focus:outline-none shrink-0 ${
                                     isActive
                                         ? "bg-gradient-to-r from-teal-500/20 via-cyan-500/15 to-transparent border border-teal-400/40 text-white shadow-lg shadow-teal-500/10"
                                         : "border border-transparent text-teal-200/60 hover:text-white hover:bg-slate-900/60"
@@ -320,13 +320,13 @@ export function RecommendationsDashboard({
 
                 {/* Level Filter for Salaries tab */}
                 {activeTab === "professional_titles" && (
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] text-teal-300/60 font-medium mr-1">Seniority:</span>
+                    <div className="flex items-center gap-1.5 overflow-x-auto horizontal-scroll no-scrollbar py-0.5">
+                        <span className="text-[11px] text-teal-300/60 font-medium mr-1 shrink-0">Seniority:</span>
                         {["All", "Entry", "Mid-Level", "Senior", "Lead"].map((lvl) => (
                             <button
                                 key={lvl}
                                 onClick={() => setSelectedLevel(lvl)}
-                                className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all ${
+                                className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all shrink-0 cursor-pointer ${
                                     selectedLevel === lvl
                                         ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
                                         : "bg-slate-950/80 text-teal-200/60 hover:text-white border border-teal-500/15"

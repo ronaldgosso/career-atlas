@@ -258,7 +258,7 @@ export function LocationSwitcher() {
             </div>
 
             {/* Continental Filter Chips */}
-            <div className="flex gap-1 overflow-x-auto pt-2.5 no-scrollbar scrollbar-none pb-0.5">
+            <div className="flex gap-1 overflow-x-auto horizontal-scroll no-scrollbar pt-2.5 pb-0.5 cursor-grab active:cursor-grabbing">
               {CONTINENTS.map((continent) => (
                 <button
                   key={continent}
