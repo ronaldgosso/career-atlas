@@ -88,7 +88,7 @@ export function HorizontalScrollProvider({ children }: { children: React.ReactNo
       }
     };
 
-    const handleMouseUp = (e: MouseEvent) => {
+    const handleMouseUp = () => {
       if (isMouseDown && activeContainer) {
         if (hasMoved) {
           const preventClick = (clickEvent: MouseEvent) => {

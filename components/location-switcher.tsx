@@ -198,7 +198,7 @@ export function LocationSwitcher() {
           }`}
         />
         <MapPin className="h-3.5 w-3.5 text-teal-300/80 shrink-0" />
-        <span className="max-w-[130px] truncate font-semibold">{currentLabel}</span>
+        <span className="max-w-[100px] sm:max-w-[130px] truncate font-semibold">{currentLabel}</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-teal-300/60 transition-transform duration-200 shrink-0 ${
             isOpen ? "rotate-180 text-teal-200" : ""
