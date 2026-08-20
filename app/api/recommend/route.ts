@@ -3,6 +3,7 @@ import { RecommendRequestSchema, type RecommendationPayload } from "@/lib/valida
 import { callMistral } from "@/lib/ai-client";
 import { isGeminiAvailable, searchYouTubeVideos } from "@/lib/gemini-youtube";
 import { enrichBooksWithGoogleBooks, isGoogleBooksAvailable } from "@/lib/google-books";
+import { getCurrencyForCountry, type CurrencyInfo } from "@/lib/currency";
 
 export type ErrorSource = "mistral" | "gemini" | "network" | "validation" | "unknown";
 
@@ -17,26 +18,24 @@ const CATEGORY_PROMPTS: Record<string, string> = {
     videos: `Generate 3 video tutorial recommendations for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Video Title", "detail":"Channel/Creator", "url":"https://youtube.com/...", "reason":"Why this video series is helpful"}]`,
     projects: `Generate 3 hands-on project ideas for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Project Name", "detail":"Scope & key deliverables", "url":"https://github.com/...", "reason":"Skills this project demonstrates"}]`,
     online_resources: `Generate 3 online learning resources for a {field} professional in {region}. Output ONLY JSON array: [{"title":"Course/Platform Name", "detail":"Platform type (Course/Certification/etc)", "url":"https://...", "reason":"Why this resource is valuable"}]`,
-    professional_titles: `Generate 3 professional job titles for {field} in {region}. Output ONLY JSON array: [{"title":"Job Title", "level":"Entry|Mid-Level|Senior|Lead", "salary_range":"Realistic range for region", "reason":"Career progression context"}]`,
-};
-
-const METADATA = {
-    currency_symbol: "$",
-    generated_at: new Date().toISOString(),
+    professional_titles: `Generate 3 professional job titles for {field} in {region}. State realistic market salary ranges in {currency_code} ({currency_symbol}). Output ONLY JSON array: [{"title":"Job Title", "level":"Entry|Mid-Level|Senior|Lead", "salary_range":"Realistic range in {currency_symbol} ({currency_code})", "reason":"Career progression context"}]`,
 };
 
 async function fetchCategory(
     category: string,
     region: string,
     field: string,
+    currency: CurrencyInfo,
     signal?: AbortSignal
 ): Promise<unknown[]> {
     const promptTemplate = CATEGORY_PROMPTS[category];
     if (!promptTemplate) throw new Error(`Unknown category: ${category}`);
 
     const prompt = promptTemplate
-        .replace("{region}", region)
-        .replace("{field}", field);
+        .replace(/{region}/g, region)
+        .replace(/{field}/g, field)
+        .replace(/{currency_symbol}/g, currency.symbol)
+        .replace(/{currency_code}/g, currency.code);
 
     const stream = await callMistral(prompt, signal);
     if (!stream) throw new Error(`Failed to fetch ${category}: data stream unavailable`);
@@ -139,6 +138,7 @@ export async function POST(req: NextRequest) {
 
     const { location, field, use_gemini } = parsed.data;
     const region = `${location.city}, ${location.country}`;
+    const currency = getCurrencyForCountry(location.countryCode);
 
     // Track which services have failed
     const serviceErrors: { source: ErrorSource; message: string }[] = [];
@@ -162,16 +162,16 @@ export async function POST(req: NextRequest) {
                 }
             }
             // Fallback to Mistral-generated video recommendations
-            return fetchCategory("videos", region, field, controller.signal);
+            return fetchCategory("videos", region, field, currency, controller.signal);
         };
 
         // Fetch all categories sequentially to respect Mistral rate limits
         const categoryTasks = [
-            () => fetchCategory("books", region, field, controller.signal) as Promise<RecommendationPayload["books"]>,
+            () => fetchCategory("books", region, field, currency, controller.signal) as Promise<RecommendationPayload["books"]>,
             () => fetchVideos() as Promise<RecommendationPayload["videos"]>,
-            () => fetchCategory("projects", region, field, controller.signal) as Promise<RecommendationPayload["projects"]>,
-            () => fetchCategory("online_resources", region, field, controller.signal) as Promise<RecommendationPayload["online_resources"]>,
-            () => fetchCategory("professional_titles", region, field, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
+            () => fetchCategory("projects", region, field, currency, controller.signal) as Promise<RecommendationPayload["projects"]>,
+            () => fetchCategory("online_resources", region, field, currency, controller.signal) as Promise<RecommendationPayload["online_resources"]>,
+            () => fetchCategory("professional_titles", region, field, currency, controller.signal) as Promise<RecommendationPayload["professional_titles"]>,
         ];
 
         const categoryResults: PromiseSettledResult<unknown>[] = [];
@@ -247,8 +247,8 @@ export async function POST(req: NextRequest) {
             professional_titles: professionalTitlesResult,
             metadata: {
                 region,
-                currency_symbol: METADATA.currency_symbol,
-                generated_at: METADATA.generated_at,
+                currency_symbol: currency.symbol,
+                generated_at: new Date().toISOString(),
             },
         };
 
