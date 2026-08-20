@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Monitor, Building2, HeartPulse, Wrench, HardHat } from "lucide-react";
+import {
+    Monitor,
+    Building2,
+    HeartPulse,
+    Wrench,
+    HardHat,
+    Sparkles,
+} from "lucide-react";
 
 interface FieldMetadata {
     name: string;
@@ -19,42 +26,84 @@ const CATEGORIES: { label: string; Icon: React.ElementType; fields: FieldMetadat
             { name: "Cloud & DevOps", tag: "Infrastructure", demand: "Surging" },
             { name: "Machine Learning Engineering", tag: "Data & Systems", demand: "Top Compensation" },
             { name: "Data Science & Analytics", tag: "Analytics", demand: "High" },
-            { name: "Cybersecurity", tag: "SecOps", demand: "Surging" },
-            { name: "UI/UX Design", tag: "Product Design", demand: "High" },
+            { name: "Cybersecurity & InfoSec", tag: "SecOps", demand: "Surging" },
+            { name: "UI/UX Design & User Research", tag: "Product Design", demand: "High" },
             { name: "Product Management", tag: "Leadership", demand: "Top Compensation" },
+            { name: "Mobile App Development (iOS/Android)", tag: "Mobile", demand: "High" },
+            { name: "Site Reliability Engineering (SRE)", tag: "Reliability", demand: "Top Compensation" },
+            { name: "Database & Data Engineering", tag: "Pipelines", demand: "Surging" },
+            { name: "Embedded Systems & IoT", tag: "Firmware", demand: "Core" },
+            { name: "Blockchain & Distributed Systems", tag: "Web3", demand: "High" },
+            { name: "Network Administration & Telecom", tag: "Networks", demand: "Core" },
             { name: "Information Technology (IT)", tag: "Systems", demand: "Core" },
-            { name: "Network Administration", tag: "Networks", demand: "Core" },
-            { name: "Digital Marketing Tech", tag: "Growth", demand: "High" },
+            { name: "Digital Marketing Tech & Growth", tag: "Growth", demand: "High" },
         ],
     },
     {
-        label: "Executive & Professional Services",
+        label: "Executive, Finance & Strategic Advisory",
         Icon: Building2,
         fields: [
-            { name: "Finance & Accounting", tag: "Fintech & Audit", demand: "Top Compensation" },
-            { name: "Law & Legal Tech", tag: "Compliance & Tech", demand: "High" },
+            { name: "Finance & Financial Engineering", tag: "Fintech & Quant", demand: "Top Compensation" },
+            { name: "Management Consulting & Strategy", tag: "Corporate Advisory", demand: "Top Compensation" },
+            { name: "Investment Banking & Private Equity", tag: "Capital Markets", demand: "Top Compensation" },
+            { name: "Law & Legal Tech", tag: "Compliance & Contracts", demand: "High" },
+            { name: "Human Resources & People Analytics", tag: "Talent Strategy", demand: "Core" },
+            { name: "Supply Chain & Global Logistics", tag: "Operations", demand: "High" },
+            { name: "Enterprise Risk & Governance", tag: "Audit & Risk", demand: "High" },
+            { name: "Venture Capital & Entrepreneurship", tag: "Startups & Growth", demand: "Surging" },
+            { name: "Corporate Communications & PR", tag: "Brand & Media", demand: "Core" },
         ],
     },
     {
-        label: "Healthcare & Life Sciences",
+        label: "Healthcare, Medicine & Life Sciences",
         Icon: HeartPulse,
         fields: [
             { name: "Healthcare & MedTech", tag: "Clinical & Digital", demand: "Surging" },
+            { name: "Biotechnology & Bioinformatics", tag: "Genomics & R&D", demand: "Top Compensation" },
+            { name: "Clinical Medicine & Patient Care", tag: "Clinical Practice", demand: "High" },
+            { name: "Pharmaceutical Sciences & Drug Discovery", tag: "Pharma R&D", demand: "Top Compensation" },
+            { name: "Health Informatics & Telehealth", tag: "Health Data", demand: "Surging" },
+            { name: "Public Health & Epidemiology", tag: "Health Policy", demand: "Core" },
+            { name: "Medical Imaging & Biomedical Devices", tag: "Bio Devices", demand: "High" },
             { name: "Education & EdTech", tag: "Learning Systems", demand: "Core" },
         ],
     },
     {
-        label: "Engineering & Advanced Systems",
+        label: "Engineering, Robotics & Advanced Physics",
         Icon: Wrench,
         fields: [
-            { name: "Engineering & Manufacturing", tag: "Robotics & Hardware", demand: "High" },
+            { name: "Robotics & Autonomous Systems", tag: "Mechatronics & AI", demand: "Surging" },
+            { name: "Electrical & Electronics Engineering", tag: "Circuits & Power", demand: "High" },
+            { name: "Mechanical Engineering & CAD", tag: "Thermal & Solid", demand: "High" },
+            { name: "Aerospace & Avionics", tag: "Flight Systems", demand: "Top Compensation" },
+            { name: "Renewable Energy & Cleantech", tag: "Solar, Wind & Battery", demand: "Surging" },
+            { name: "Chemical & Materials Engineering", tag: "Advanced Materials", demand: "High" },
+            { name: "Industrial & Manufacturing Systems", tag: "Smart Factories", demand: "Core" },
+            { name: "Quantum Engineering & Computing", tag: "Quantum Systems", demand: "Top Compensation" },
         ],
     },
     {
-        label: "Infrastructure & Built Environment",
+        label: "Infrastructure, Architecture & Built Environment",
         Icon: HardHat,
         fields: [
-            { name: "Construction & Real Estate", tag: "PropTech & Projects", demand: "Core" },
+            { name: "Civil & Structural Engineering", tag: "Public Works", demand: "High" },
+            { name: "Architecture & Spatial Design", tag: "BIM & Sustainable", demand: "Core" },
+            { name: "Urban Planning & Smart Cities", tag: "Transit & Zoning", demand: "High" },
+            { name: "Construction Management & Real Estate", tag: "PropTech & Builds", demand: "High" },
+            { name: "Environmental Engineering & Sustainability", tag: "Ecology & ESG", demand: "Surging" },
+            { name: "Mining & Geotechnical Engineering", tag: "Earth Sciences", demand: "Top Compensation" },
+            { name: "Water Resources & Hydrology", tag: "Sanitation & Water", demand: "Core" },
+        ],
+    },
+    {
+        label: "Creative Media, Game Dev & Spatial Computing",
+        Icon: Sparkles,
+        fields: [
+            { name: "Game Development & 3D Engines", tag: "Unreal & Unity", demand: "Surging" },
+            { name: "AR/VR & Spatial Computing", tag: "Immersive Tech", demand: "Surging" },
+            { name: "Digital Animation & VFX", tag: "CGI & Motion", demand: "High" },
+            { name: "Technical Writing & Developer Relations", tag: "Documentation", demand: "Core" },
+            { name: "Audio Engineering & Sound Design", tag: "Acoustics & Media", demand: "Core" },
         ],
     },
 ];
