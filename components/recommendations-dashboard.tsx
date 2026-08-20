@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { type RecommendationPayload } from "@/lib/validators";
 import { exportRecommendationToPDF } from "@/lib/pdf-export";
 import {
@@ -18,11 +18,12 @@ import {
     ExternalLink,
 } from "lucide-react";
 
-type Tab = "professional_titles" | "projects" | "books" | "videos" | "online_resources";
+type Tab = "professional_titles" | "projects" | "roadmap" | "books" | "videos" | "online_resources";
 
 const TABS: { key: Tab; label: string; Icon: React.ElementType; subtitle: string }[] = [
     { key: "professional_titles", label: "Market Compensation & Roles", Icon: Briefcase, subtitle: "Salary benchmarks & job levels" },
     { key: "projects", label: "Capstone Projects", Icon: Code2, subtitle: "Recruiter-grade portfolio pieces" },
+    { key: "roadmap", label: "Skill Roadmap & Milestones", Icon: CheckCircle2, subtitle: "Self-assessment & tracker" },
     { key: "books", label: "Curated Literature", Icon: BookOpen, subtitle: "Verified books & deep-dive reading" },
     { key: "videos", label: "Masterclasses & Videos", Icon: Video, subtitle: "Video tutorials & tech series" },
     { key: "online_resources", label: "Courses & Certifications", Icon: GraduationCap, subtitle: "Specialized learning paths" },
@@ -61,6 +62,79 @@ export function RecommendationsDashboard({
 
     const { books, videos, projects, online_resources, professional_titles, metadata } = payload;
     const effectiveField = field || metadata.region || "Professional Discipline";
+
+    // Competency statuses state with localStorage persistence
+    const [competencyStatuses, setCompetencyStatuses] = useState<Record<string, "todo" | "in_progress" | "mastered">>({});
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const saved = localStorage.getItem(`career_atlas_competency_${effectiveField}`);
+                if (saved) {
+                    setCompetencyStatuses(JSON.parse(saved));
+                }
+            } catch {
+                // Ignore storage errors
+            }
+        }
+    }, [effectiveField]);
+
+    const handleToggleCompetency = (id: string) => {
+        setCompetencyStatuses((prev) => {
+            const current = prev[id] || "todo";
+            const nextStatus: "todo" | "in_progress" | "mastered" =
+                current === "todo" ? "in_progress" : current === "in_progress" ? "mastered" : "todo";
+            const updated = { ...prev, [id]: nextStatus };
+            if (typeof window !== "undefined") {
+                try {
+                    localStorage.setItem(`career_atlas_competency_${effectiveField}`, JSON.stringify(updated));
+                } catch {
+                    // Ignore
+                }
+            }
+            return updated;
+        });
+    };
+
+    // Synthesize structured milestones from data
+    const roadmapMilestones = useMemo(() => {
+        const milestones = [
+            ...professional_titles.map((title, idx) => ({
+                id: `role-req-${idx}`,
+                category: "Target Role Readiness",
+                title: `${title.title} Core Competencies`,
+                description: title.reason,
+                badge: `${title.level} Tier`,
+                level: title.level,
+            })),
+            ...projects.map((proj, idx) => ({
+                id: `capstone-req-${idx}`,
+                category: "Practical Portfolio Execution",
+                title: `Deliver ${proj.title}`,
+                description: `${proj.detail} — Validates: ${proj.reason}`,
+                badge: `Capstone #${idx + 1}`,
+                level: "Mid-Level",
+            })),
+            ...books.slice(0, 3).map((book, idx) => ({
+                id: `book-req-${idx}`,
+                category: "Domain Theory & Fundamentals",
+                title: `Master ${book.title}`,
+                description: `${book.detail} — Key focus: ${book.reason}`,
+                badge: "Literature",
+                level: "Entry",
+            })),
+        ];
+        return milestones;
+    }, [professional_titles, projects, books]);
+
+    const roadmapStats = useMemo(() => {
+        const total = roadmapMilestones.length;
+        if (total === 0) return { mastered: 0, inProgress: 0, total: 0, percent: 0 };
+        const mastered = roadmapMilestones.filter((m) => competencyStatuses[m.id] === "mastered").length;
+        const inProgress = roadmapMilestones.filter((m) => competencyStatuses[m.id] === "in_progress").length;
+        const percent = Math.round(((mastered + inProgress * 0.5) / total) * 100);
+        return { mastered, inProgress, total, percent };
+    }, [roadmapMilestones, competencyStatuses]);
 
     // Toggle bookmark
     const toggleBookmark = (id: string) => {
@@ -111,6 +185,7 @@ export function RecommendationsDashboard({
         setTimeout(() => setCopiedBulletIndex(null), 2500);
     };
 
+    // Export PDF
     const handleExportPDF = () => {
         exportRecommendationToPDF(payload, region, effectiveField, generatedAt || Date.now());
     };
@@ -131,6 +206,17 @@ export function RecommendationsDashboard({
             });
         }
 
+        if (activeTab === "roadmap") {
+            return roadmapMilestones.filter((m) => {
+                if (!q) return true;
+                return (
+                    m.title.toLowerCase().includes(q) ||
+                    m.description.toLowerCase().includes(q) ||
+                    m.category.toLowerCase().includes(q)
+                );
+            });
+        }
+
         const items =
             activeTab === "projects"
                 ? projects
@@ -147,7 +233,7 @@ export function RecommendationsDashboard({
                 item.detail.toLowerCase().includes(q) ||
                 item.reason.toLowerCase().includes(q)
         );
-    }, [activeTab, tabFilterQuery, selectedLevel, professional_titles, projects, books, videos, online_resources]);
+    }, [activeTab, tabFilterQuery, selectedLevel, professional_titles, projects, books, videos, online_resources, roadmapMilestones]);
 
     return (
         <div className="overflow-hidden rounded-3xl border border-teal-500/20 bg-slate-950/80 shadow-2xl backdrop-blur-xl transition-all">
@@ -474,6 +560,136 @@ export function RecommendationsDashboard({
                                 </div>
                             );
                         })}
+                    </div>
+                ) : activeTab === "roadmap" ? (
+                    /* ── INTERACTIVE COMPETENCY & MILESTONE ROADMAP ── */
+                    <div className="space-y-6">
+                        {/* Overall Progress Card */}
+                        <div className="rounded-2xl border border-teal-500/20 bg-gradient-to-r from-teal-950/60 via-slate-900/80 to-slate-950/90 p-4 sm:p-6 backdrop-blur-md">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        <h4 className="text-sm sm:text-base font-bold text-white">
+                                            {effectiveField} Competency Mastery
+                                        </h4>
+                                    </div>
+                                    <p className="text-xs text-teal-200/60">
+                                        Track target milestones derived from market expectations & recruiter validations.
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-4 shrink-0">
+                                    <div className="text-right">
+                                        <span className="text-xl sm:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-200 to-emerald-300">
+                                            {roadmapStats.percent}%
+                                        </span>
+                                        <p className="text-[10px] uppercase font-mono text-teal-300/60">Proficiency Score</p>
+                                    </div>
+                                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-teal-500/30 flex items-center justify-center bg-slate-950 font-bold text-xs text-teal-300">
+                                        {roadmapStats.mastered}/{roadmapStats.total}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Progress bar */}
+                            <div className="mt-4 h-2 w-full rounded-full bg-slate-950 overflow-hidden border border-teal-500/10">
+                                <div
+                                    className="h-full rounded-full bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 transition-all duration-500"
+                                    style={{ width: `${Math.max(5, roadmapStats.percent)}%` }}
+                                />
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-teal-200/60">
+                                <span className="inline-flex items-center gap-1.5">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                                    {roadmapStats.mastered} Mastered
+                                </span>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                                    {roadmapStats.inProgress} In Progress
+                                </span>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <span className="h-2 w-2 rounded-full bg-slate-600" />
+                                    {roadmapStats.total - roadmapStats.mastered - roadmapStats.inProgress} Pending
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Milestones List */}
+                        <div className="space-y-3">
+                            {filteredContent.map((itemAny) => {
+                                const item = itemAny as {
+                                    id: string;
+                                    category: string;
+                                    title: string;
+                                    description: string;
+                                    badge: string;
+                                    level: string;
+                                };
+                                const status = competencyStatuses[item.id] || "todo";
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        onClick={() => handleToggleCompetency(item.id)}
+                                        className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-2xl border p-4 transition-all duration-200 cursor-pointer ${
+                                            status === "mastered"
+                                                ? "border-emerald-500/40 bg-emerald-950/20 shadow-md shadow-emerald-500/5"
+                                                : status === "in_progress"
+                                                ? "border-cyan-500/35 bg-cyan-950/20 shadow-md shadow-cyan-500/5"
+                                                : "border-teal-500/15 bg-slate-900/60 hover:border-teal-400/30 hover:bg-slate-900/90"
+                                        }`}
+                                    >
+                                        <div className="space-y-1 flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="text-[10px] font-mono uppercase tracking-wider text-teal-400/80 font-bold">
+                                                    {item.category}
+                                                </span>
+                                                <span className="rounded-md bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 text-[10px] font-semibold text-teal-300">
+                                                    {item.badge}
+                                                </span>
+                                            </div>
+                                            <h4
+                                                className={`text-sm sm:text-base font-bold transition-colors ${
+                                                    status === "mastered"
+                                                        ? "text-emerald-300 line-through decoration-emerald-500/60"
+                                                        : "text-white group-hover:text-cyan-300"
+                                                }`}
+                                            >
+                                                {item.title}
+                                            </h4>
+                                            <p className="text-xs text-teal-200/70">{item.description}</p>
+                                        </div>
+
+                                        {/* Status Pill Button */}
+                                        <div className="shrink-0 flex items-center justify-start sm:justify-end">
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all shadow-sm ${
+                                                    status === "mastered"
+                                                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                                        : status === "in_progress"
+                                                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+                                                        : "bg-slate-800/80 text-slate-400 border border-slate-700/50 hover:bg-slate-800 hover:text-slate-200"
+                                                }`}
+                                            >
+                                                {status === "mastered" && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />}
+                                                {status === "in_progress" && <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />}
+                                                {status === "todo" && <span className="h-2 w-2 rounded-full bg-slate-500" />}
+                                                <span>
+                                                    {status === "mastered"
+                                                        ? "Mastered"
+                                                        : status === "in_progress"
+                                                        ? "In Progress"
+                                                        : "To Learn"}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 ) : (
                     /* ── BOOKS / VIDEOS / COURSES VIEW ── */
