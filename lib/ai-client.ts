@@ -1,19 +1,84 @@
 const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
-const DEFAULT_MODEL = "mistral-small-latest";
+
+/**
+ * Candidate Mistral models ordered by reliability and rate-limit tolerance:
+ * 1. open-mistral-7b: Free & standard tier workhorse model with high throughput.
+ * 2. ministral-8b-latest: Modern, fast 8B instruction model.
+ * 3. mistral-tiny: Lightweight legacy fallback model.
+ * 4. mistral-small-latest: Higher-tier model (retained as candidate if tier permits).
+ */
+export const CANDIDATE_MODELS = [
+    "open-mistral-7b",
+    "ministral-8b-latest",
+    "mistral-tiny",
+    "mistral-small-latest",
+] as const;
+
+let activeWorkingModel: string | null = null;
+
+/**
+ * Safely extracts the Mistral API key from server environment.
+ */
+export function getMistralApiKey(): string | undefined {
+    if (typeof process === "undefined" || !process?.env) return undefined;
+    return (
+        process.env.MISTRAL_API_KEY?.trim() ||
+        process.env.MISTRAL_APIKEY?.trim() ||
+        undefined
+    );
+}
+
+/**
+ * Returns the candidate models list, prioritizing a previously confirmed working model
+ * or a user-specified MISTRAL_MODEL environment override.
+ */
+export function getCandidateModels(): string[] {
+    const customModel = typeof process !== "undefined" ? process?.env?.MISTRAL_MODEL?.trim() : undefined;
+    const candidates: string[] = [];
+
+    // If an active working model was already verified in this runtime, try it first
+    if (activeWorkingModel && !candidates.includes(activeWorkingModel)) {
+        candidates.push(activeWorkingModel);
+    }
+
+    // If the user specified a custom model in environment
+    if (customModel && !candidates.includes(customModel)) {
+        candidates.push(customModel);
+    }
+
+    // Append default fallback candidates
+    for (const model of CANDIDATE_MODELS) {
+        if (!candidates.includes(model)) {
+            candidates.push(model);
+        }
+    }
+
+    return candidates;
+}
+
+/**
+ * Resets the runtime-cached working model. Useful for tests or after credentials change.
+ */
+export function resetActiveModel(): void {
+    activeWorkingModel = null;
+}
 
 export async function callMistral(
     prompt: string,
     signal?: AbortSignal
 ): Promise<ReadableStream<Uint8Array> | null> {
-    const apiKey = process.env.MISTRAL_API_KEY || process.env.MISTRAL_APIKEY;
+    const apiKey = getMistralApiKey();
     if (!apiKey) throw new Error("AI API key missing in server environment");
 
-    const model = process.env.MISTRAL_MODEL || DEFAULT_MODEL;
+    const candidateModels = getCandidateModels();
+    let lastError: Error | null = null;
 
-    let retries = 3;
-    let delay = 1000;
+    for (let i = 0; i < candidateModels.length; i++) {
+        const model = candidateModels[i];
+        if (signal?.aborted) {
+            throw new Error("Request aborted");
+        }
 
-    while (retries > 0) {
         try {
             const response = await fetch(MISTRAL_API_URL, {
                 method: "POST",
@@ -43,14 +108,32 @@ export async function callMistral(
                 }
 
                 const status = response.status;
-                const error = new Error(`AI model error (${status}): ${parsedMessage}`);
+                const error = new Error(`AI model error (${status}) with model '${model}': ${parsedMessage}`);
                 (error as { status?: number }).status = status;
-                throw error;
+
+                // Stop immediately if credentials are unauthorized/forbidden
+                if (status === 401 || status === 403) {
+                    throw error;
+                }
+
+                // If currently cached model failed, clear cache
+                if (activeWorkingModel === model) {
+                    activeWorkingModel = null;
+                }
+
+                console.warn(
+                    `[Mistral AI] Candidate '${model}' returned status ${status} (${parsedMessage}). Trying next candidate...`
+                );
+                lastError = error;
+                continue; // Try next candidate model
             }
 
             if (!response.body) {
-                throw new Error("AI model returned an empty response body");
+                throw new Error(`AI model '${model}' returned an empty response body`);
             }
+
+            // Immediately break and record successful model to avoid redundant fallback overhead
+            activeWorkingModel = model;
 
             const bodyReader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -120,7 +203,7 @@ export async function callMistral(
                 throw new Error("Response exceeded token limit. Try a simpler request.");
             }
 
-            // Do not retry authorization or invalid key errors
+            // Do not retry authorization or invalid key errors across candidates
             if (
                 errorMsg.includes("401") ||
                 errorMsg.includes("403") ||
@@ -130,24 +213,11 @@ export async function callMistral(
                 throw err;
             }
 
-            const isRateLimit =
-                errorMsg.includes("429") ||
-                errorMsg.includes("rate limit") ||
-                errorMsg.includes("throttling") ||
-                errorMsg.includes("quota");
-
-            retries--;
-            if (retries <= 0) throw err;
-
-            // Use longer wait time with random jitter for 429 rate limits
-            const waitTime = isRateLimit
-                ? delay + Math.floor(Math.random() * 1500) + 1000
-                : delay;
-
-            await new Promise((r) => setTimeout(r, waitTime));
-            delay *= 2;
+            lastError = err instanceof Error ? err : new Error(String(err));
+            console.warn(`[Mistral AI] Error invoking model '${model}': ${errorMsg}. Falling back...`);
         }
     }
-    throw new Error("Max retries exceeded for AI model service");
+
+    throw lastError || new Error("All candidate Mistral models failed to respond");
 }
 
