@@ -70,15 +70,33 @@ function classifyMistralError(err: unknown): string {
     const msg = rawMsg || "Data service unavailable";
     const lower = msg.toLowerCase();
 
+    console.error("[Mistral Classification]", rawMsg);
+
+    if (
+        lower.includes("missing in server environment") ||
+        lower.includes("mistral_api_key missing") ||
+        lower.includes("api key missing")
+    ) {
+        return "MISTRAL_API_KEY is not configured in server environment variables. Please add it to your hosting dashboard (e.g. Vercel Project Settings > Environment Variables) and redeploy.";
+    }
+
     if (
         lower.includes("401") ||
         lower.includes("403") ||
         lower.includes("unauthorized") ||
-        lower.includes("token") ||
-        lower.includes("api key") ||
-        lower.includes("mistral_api_key missing")
+        lower.includes("invalid api key") ||
+        lower.includes("bad api key") ||
+        lower.includes("invalid token")
     ) {
-        return "Service authorization notice. Please check system credentials.";
+        return "Service authorization notice: API key rejected by Mistral AI. Please verify your credentials.";
+    }
+
+    if (
+        lower.includes("token limit") ||
+        lower.includes("exceeded token") ||
+        lower.includes("max_tokens")
+    ) {
+        return "Query complexity exceeded token limit. Please retry with a simpler query.";
     }
     if (lower.includes("429") || lower.includes("rate limit") || lower.includes("too many") || lower.includes("quota")) {
         return "Market data servers are experiencing high volume. Please wait a moment and retry.";

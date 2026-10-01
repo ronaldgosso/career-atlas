@@ -18,14 +18,28 @@ let activeWorkingModel: string | null = null;
 
 /**
  * Safely extracts the Mistral API key from server environment.
+ * Supports MISTRAL_API_KEY, MISTRAL_APIKEY, and NEXT_PUBLIC_MISTRAL_API_KEY.
+ * Automatically cleans leading/trailing whitespace and surrounding quotes.
  */
 export function getMistralApiKey(): string | undefined {
     if (typeof process === "undefined" || !process?.env) return undefined;
-    return (
-        process.env.MISTRAL_API_KEY?.trim() ||
-        process.env.MISTRAL_APIKEY?.trim() ||
-        undefined
-    );
+    const rawKey =
+        process.env.MISTRAL_API_KEY ||
+        process.env.MISTRAL_APIKEY ||
+        process.env.NEXT_PUBLIC_MISTRAL_API_KEY;
+
+    if (!rawKey) return undefined;
+
+    let key = rawKey.trim();
+    // Strip accidental surrounding quotes commonly pasted into hosting dashboards
+    if (
+        (key.startsWith('"') && key.endsWith('"')) ||
+        (key.startsWith("'") && key.endsWith("'"))
+    ) {
+        key = key.slice(1, -1).trim();
+    }
+
+    return key || undefined;
 }
 
 /**
@@ -68,7 +82,11 @@ export async function callMistral(
     signal?: AbortSignal
 ): Promise<ReadableStream<Uint8Array> | null> {
     const apiKey = getMistralApiKey();
-    if (!apiKey) throw new Error("AI API key missing in server environment");
+    if (!apiKey) {
+        throw new Error(
+            "MISTRAL_API_KEY missing in server environment. Please set MISTRAL_API_KEY in your production hosting settings (e.g. Vercel Project Settings > Environment Variables) and redeploy."
+        );
+    }
 
     const candidateModels = getCandidateModels();
     let lastError: Error | null = null;
