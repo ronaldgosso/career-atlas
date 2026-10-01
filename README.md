@@ -228,7 +228,7 @@ npm run start    # production server
 | **UI Library** | [React 19](https://react.dev/) |
 | **Styling** | [Tailwind CSS 3.4](https://tailwindcss.com/) |
 | **Language** | [TypeScript 5.7](https://www.typescriptlang.org/) |
-| **AI Engine** | [Mistral AI](https://mistral.ai/) (`mistral-small-latest`) |
+| **AI Engine** | [Mistral AI](https://mistral.ai/) (`open-mistral-7b` with multi-tier fallback) |
 | **Video Search** | [Google Gemini](https://ai.google.dev/) 2.0 Flash with Google Search grounding (optional) |
 | **Book Verification** | [Google Books API](https://developers.google.com/books) — verified metadata + permanent URLs |
 | **Validation** | [Zod](https://zod.dev/) |
